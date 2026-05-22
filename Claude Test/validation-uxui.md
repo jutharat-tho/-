@@ -1,75 +1,68 @@
-# validation-uxui.md — Leasing BO: Authentication & User Management
+# Validation & Sign-off — Leasing Design BO
 
-**Feature scope:** Authentication + User Management
-**Design spec:** `./UXUI_DESIGN.md` v0.1
-**Stories:** `./STORIES.md` (AUTH-001..003, USER-001..003, EMAIL-001)
-**Status:** `draft` → `in_review` → `approved` → `final`
-**Current status:** `draft`
+**Last updated:** 2026-05-23
+**Owner:** UX/UI
+**Related:** [`requirement.md`](./requirement.md) · [`UXUI_DESIGN.md`](./UXUI_DESIGN.md) · [`figma-links.md`](./figma-links.md)
 
----
-
-## 1. Pre-Review Checklist (UX self-check)
-
-- [x] 6 states ต่อหน้าจอ (default · loading · empty · error · success · disabled)
-- [x] Responsive notes ระบุครบ
-- [x] Tokens ใน docs ตรงกับ Figma (เมื่อมี Figma)
-- [x] Accessibility notes ครบ (label, aria-live, focus, contrast)
-- [x] Edge cases ของ data (empty user list, long names, INACTIVE rows)
-- [ ] Interactive prototype พร้อม click-through *(ต้องทำใน Figma)*
-
-## 2. Pre-Handoff Checklist (UX → Dev)
-
-- [ ] Dev Mode เปิดใน Figma
-- [ ] Component name ใน Figma ตรงกับชื่อใน `STORIES.md`
-- [ ] Tokens export → `design-tokens.json` / `design-tokens.css` ✅
-- [ ] Figma node link ใน `STORIES.md` แทนที่ `<FIGMA_NODE_URL>` ครบ
-- [ ] Interaction spec (timing, easing) ระบุใน Figma prototype
+> Use this file to capture design-review decisions, approvals, and what changed and why. **One row per decision** — keep entries short and link to the affected screen / spec section.
 
 ---
 
-## 3. Stakeholder Approval
+## 1. Approver matrix
 
-| Role | Name | Approved | Date | Comments |
-|---|---|:-:|---|---|
-| **BA** | _______________ | ☐ | __________ |  |
-| **PM** | _______________ | ☐ | __________ |  |
-| **Frontend Dev Lead** | _______________ | ☐ | __________ |  |
-| **Security Lead** *(แนะนำเพิ่ม — เพราะ C-01/C-02)* | _______________ | ☐ | __________ |  |
-| **UX (author)** | _______________ | ☐ | __________ |  |
+| Role | Name | Required for sign-off | Status |
+|---|---|---|---|
+| BA | TBD | ✅ Yes | not assigned |
+| PM | TBD | ✅ Yes | not assigned |
+| Frontend Dev Lead | TBD | ✅ Yes | not assigned |
+| UX/UI | (session) | ✅ Yes (author) | active |
 
 ---
 
-## 4. Open Questions (จาก UXUI_DESIGN.md §10)
+## 2. Review status — per feature
 
-| # | Question | Owner | Answer | Date |
+| Feature | Status | BA | PM | FE Lead | Next action |
+|---|---|---|---|---|---|
+| F-01 Login (Temp Password) | `draft` | — | — | — | Schedule walkthrough |
+| F-02 Login (Password Expire) | `draft` | — | — | — | Schedule walkthrough |
+| F-03 Set New Password | `draft` | — | — | — | Schedule walkthrough |
+| F-04 Create User | `draft` | — | — | — | Schedule walkthrough |
+| F-05 Edit User | `draft` | — | — | — | Schedule walkthrough |
+| F-06 Reset Password | `draft` | — | — | — | Schedule walkthrough |
+| F-08 Auto Logout | `draft` | — | — | — | Decide silent vs. warning toast |
+
+Status values: `draft` → `in_review` → `approved` → `final`.
+
+---
+
+## 3. Open issues / pending decisions
+
+| # | Issue | Owner | Target | Status |
 |---|---|---|---|---|
-| Q-01 | Admin role เห็นหน้า User Management ไหม? | BA |  |  |
-| Q-02 | รองรับมือถือ scope ไหน? | PM |  |  |
-| Q-03 | Email language: ไทยอย่างเดียว / bilingual? | BA |  |  |
-| Q-04 | Login URL ใน email ใช้ deep link prefill? | Frontend Lead |  |  |
-| Q-05 | Backend rate limit / CAPTCHA (C-02 mitigation)? | Backend Lead |  |  |
+| I-01 | Confirm exact wording for "Password expire" and "Password ซ้ำ" dialogs | BA | — | open |
+| I-02 | Decide responsive scope (BO at < 1440px?) | PM + FE Lead | — | open |
+| I-03 | Decide auto-logout UX (silent vs. 60s warning toast) | PM + BA | — | open |
+| I-04 | Design empty / loading / disabled states for all forms | UX/UI | — | open |
+| I-05 | Confirm Reset Password kills active sessions (backend behavior) | FE Lead | — | open |
+| I-06 | Define focus-ring token + apply across components | UX/UI | — | open |
+| I-07 | EN copy for all error/dialog strings | BA | — | open |
+| I-08 | Audit logging UI for admin actions (next release?) | PM | — | deferred |
 
 ---
 
-## 5. BRD Conflict Decisions (UX flagged)
+## 4. Decisions log
 
-| # | Decision | Risk | Stakeholder Confirmed | Mitigation |
+| Date | Decision | Reason | Affects | Approved by |
 |---|---|---|---|---|
-| C-01 | ไม่มี Auto Logout Warning Modal | data loss กลาง form ยาว | ✅ PO confirmed | autosave draft (recommend dev) |
-| C-02 | ไม่มี Failed Login warning, ไม่ lock | brute force | ✅ PO confirmed | ต้องมี backend rate limit + CAPTCHA (Q-05) |
-| C-03 | ไม่มี Forgot Password link บน Login | UX ไม่ชัดว่าทำยังไง | ✅ PO confirmed | hint text / FAQ link (optional) |
-| C-04 | Set Password → กลับ Login ไม่ auto-login | extra login step | ✅ PO confirmed | toast feedback ก่อน redirect (UX 2s) |
+| — | (no decisions yet) | — | — | — |
+
+> Template for a future row:
+> `2026-05-30 | Use 1440px as the single BO breakpoint for v1 | Customer support team works on managed laptops at 1440×900 | All BO screens | PM + UX/UI`
 
 ---
 
-## 6. Review Meeting Log
+## 5. Change log
 
-| Date | Attendees | Decisions / Action items |
+| Date | Change | Reason |
 |---|---|---|
-|  |  |  |
-
----
-
-## 7. Sign-off
-
-> เมื่อทุก row ใน §3 ✅ ครบ → เปลี่ยน status เป็น `final` แล้วเริ่ม dev handoff
+| 2026-05-23 | Initial validation file scaffolded with approver matrix, feature status, open issues | Kick-off — issues mirror gaps captured in UXUI_DESIGN.md §2 |

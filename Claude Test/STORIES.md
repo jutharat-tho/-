@@ -1,256 +1,160 @@
-# STORIES.md — Leasing BO: Authentication & User Management
+# Stories — Dev Handoff
 
-**Linked design spec:** `./UXUI_DESIGN.md`
-**Linked tokens:** `./design-tokens.json` · `./design-tokens.css`
-**Figma links:** `./figma-links.md`
+**Last updated:** 2026-05-23
+**Owner:** UX/UI
+**Related:** [`requirement.md`](./requirement.md) · [`UXUI_DESIGN.md`](./UXUI_DESIGN.md) · [`figma-links.md`](./figma-links.md) · [`design-tokens.md`](./design-tokens.md)
 
-> หลังออกแบบ Figma เสร็จ ให้แทนที่ `<FIGMA_NODE_URL>` ด้วย URL จริงจาก **Dev Mode → Copy link to selection**
-> ชื่อ component ใน Figma **ต้องตรงกับ** `Component` ในแต่ละ story (ถ้าไม่ตรง dev จะ map ไม่ออก)
+> One story per discrete, ship-able piece of UI work. Each story links directly to the Figma node(s), references the rules in `requirement.md`, and lists the components / tokens involved.
+> **Definition of Done (story-level):** the screen renders with all referenced states, matches the Figma frame at 1440×1024, uses tokens from `design-tokens.md` (no hard-coded values), and has unit tests for happy + at least one error path.
 
 ---
 
-## AUTH-001: Login Page
+## Conventions
 
-**As a** registered user
-**I want to** เข้าสู่ระบบด้วยรหัสพนักงานและรหัสผ่าน
-**So that** ใช้งาน BO ตาม role ของฉันได้
+- Story ID format: `LEASING-<area>-<n>` (e.g. `LEASING-AUTH-01`). Replace with your tracker prefix.
+- "Components" column lists the canonical Figma component names — match them in code (see `UXUI_DESIGN.md` §4).
+- "Rules" column references rule IDs from `requirement.md` so engineers can trace requirements.
 
-### Acceptance Criteria
-- [ ] กรอกรหัสพนักงาน + รหัสผ่านครบ → ปุ่ม "เข้าสู่ระบบ" enabled
-- [ ] กดเข้าสู่ระบบสำเร็จ → redirect ไป BO หน้าหลักตาม role
-- [ ] รหัสผ่านผิด → แสดง inline error "รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง"
-- [ ] Password expired → เปิด `PasswordExpiredModal` (AUTH-003)
-- [ ] ปุ่ม 👁 toggle password visibility ได้
-- [ ] กรอกรหัสผ่านผิด >5 ครั้ง: ระบบยังให้กรอกต่อได้ (no lock, no warning) ตาม C-02
+---
 
-### Components (Figma ↔ code)
-| Component | Figma node |
+## Auth area
+
+### LEASING-AUTH-01 — Login screen (default + filled + invalid credentials)
+
+| Field | Value |
 |---|---|
-| `Page/Login` | `<FIGMA_NODE_URL>` |
-| `TextField/Username` | `<FIGMA_NODE_URL>` |
-| `TextField/Password` | `<FIGMA_NODE_URL>` |
-| `Button/Primary` | `<FIGMA_NODE_URL>` |
+| Figma — default | [`139:28609`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=139-28609) |
+| Figma — filled | [`139:28610`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=139-28610) |
+| Figma — invalid credentials | [`182:68431`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=182-68431) |
+| Rules | R-TP-04, R-SES-03 |
+| Components | Login Container, Text field, Buttons/Basic, Language pill |
+| Notes | Submit POSTs username + password. On 401 → show inline error. Form must not lock user. |
 
-### States
-default · loading · error · success · disabled · responsive
+### LEASING-AUTH-02 — Login: temp password expired (inline error)
 
-### Dependencies
-none
-
----
-
-## AUTH-002: Set Password Page
-
-**As a** user with temp password / expired password
-**I want to** ตั้งรหัสผ่านใหม่ตาม policy
-**So that** เข้าใช้งานต่อได้
-
-### Acceptance Criteria
-- [ ] แสดง real-time validation checklist 6 ข้อ (ความยาว 8–12, A-Z, a-z, 0-9, อักขระพิเศษ, ไม่ซ้ำ password เก่า)
-- [ ] checklist update ทุก keystroke; ✓ เขียวเมื่อผ่าน
-- [ ] 2 field "รหัสผ่านใหม่" + "ยืนยันรหัสผ่านใหม่" ต้องตรงกัน
-- [ ] ปุ่ม "บันทึกรหัสผ่าน" disabled จนกว่า rule ครบ + password match
-- [ ] บันทึกสำเร็จ → toast 2s "ตั้งรหัสผ่านสำเร็จ" → redirect Login (ตาม C-04)
-- [ ] ถ้าใส่ password ซ้ำเก่า → rule #6 แสดง ✗ แดง
-- [ ] ไม่มีปุ่ม Cancel (forced flow)
-
-### Components
-| Component | Figma node |
+| Field | Value |
 |---|---|
-| `Page/SetPassword` | `<FIGMA_NODE_URL>` |
-| `TextField/Password` | `<FIGMA_NODE_URL>` |
-| `ValidationChecklist` | `<FIGMA_NODE_URL>` |
-| `Toast/Success` | `<FIGMA_NODE_URL>` |
+| Figma | [`139:28611`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=139-28611) |
+| Rules | R-TP-03, R-TP-04, R-TP-06 |
+| Components | Text field (error variant), Buttons/Basic |
+| Notes | API returns `temp_password_expired` → render copy: "รหัสผ่านไม่ถูกต้อง หากลืมรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ" |
 
-### States
-default · loading · error (mismatch) · error (same as old) · success · disabled · responsive
+### LEASING-AUTH-03 — Set new password (after temp login)
 
-### Dependencies
-none
-
----
-
-## AUTH-003: Password Expired Modal
-
-**As a** user logging in with expired password
-**I want to** เห็น modal แจ้งและไปตั้งรหัสผ่านใหม่
-**So that** เข้าใช้งานต่อได้
-
-### Acceptance Criteria
-- [ ] Trigger หลังกดเข้าสู่ระบบ → backend ตอบ `password_expired`
-- [ ] แสดง icon ⏰ + message + CTA "ตั้งรหัสผ่านใหม่"
-- [ ] CTA → ไป `Page/SetPassword` (AUTH-002)
-- [ ] ✕ ปิดได้ — กลับมาที่ Login (ยัง login ไม่ผ่าน)
-- [ ] Esc ปิดได้, focus กลับไป username
-
-### Components
-| Component | Figma node |
+| Field | Value |
 |---|---|
-| `Modal/PasswordExpired` | `<FIGMA_NODE_URL>` |
-| `Button/Primary` | reuse จาก AUTH-001 |
+| Figma — default | [`139:29024`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=139-29024) |
+| Figma — filled | [`139:29025`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=139-29025) |
+| Figma — error (policy fail) | [`139:29026`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=139-29026) |
+| Rules | R-PWD-01..R-PWD-04, R-TP-05 |
+| Components | Text field × 2 (New, Confirm) + show/hide toggle, Buttons/Basic, password policy checklist |
+| Notes | Policy validation client-side; submit returns to Login on success. |
 
-### States
-default · responsive
+### LEASING-AUTH-04 — Dialog: new password matches temp
 
-### Dependencies
-blocks: AUTH-002 (CTA นำไป)
-
----
-
-## USER-001: BO User Management List
-
-**As a** SuperAdmin
-**I want to** ดูและจัดการรายชื่อ user ในระบบ
-**So that** สร้าง/แก้ไข/รีเซ็ตรหัสผ่านได้
-
-### Acceptance Criteria
-- [ ] แสดงตาราง: รหัสพนง. · ชื่อ-นามสกุล · อีเมล · Role · Status · Action(⋮)
-- [ ] Pagination: 20 rows/page (default), แสดง "1-20 จาก N"
-- [ ] Search field — filter ตาม รหัส/ชื่อ/อีเมล (debounce 300ms)
-- [ ] Filter: Role dropdown + Status dropdown
-- [ ] Row action menu (⋮): ดูรายละเอียด · แก้ไข · Reset Password · เปลี่ยน Status
-- [ ] กด "+ สร้างผู้ใช้ใหม่" → เปิด `Modal/CreateUser` (USER-002)
-- [ ] กด Reset Password ใน ⋮ → เปิด `Dialog/ResetPasswordConfirm` (USER-003)
-- [ ] Row ที่ Status=INACTIVE → text เทาลง + badge "INACTIVE"
-
-### Components
-| Component | Figma node |
+| Field | Value |
 |---|---|
-| `Page/UserManagement` | `<FIGMA_NODE_URL>` |
-| `Table/Users` | `<FIGMA_NODE_URL>` |
-| `Badge/Status` | `<FIGMA_NODE_URL>` |
-| `Menu/RowAction` | `<FIGMA_NODE_URL>` |
-| `Pagination` | `<FIGMA_NODE_URL>` |
-| `Toolbar/SearchFilter` | `<FIGMA_NODE_URL>` |
+| Figma | [`329:38870`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=329-38870) |
+| Rules | R-PWD-04 |
+| Components | Dialog (Confirm info) |
+| Notes | Modal blocks until dismissed; returns focus to "New password" input. |
 
-### States
-default · loading (skeleton) · empty · error · success (toast หลัง action) · disabled (row INACTIVE) · responsive
+### LEASING-AUTH-05 — Login: password expired flow (dialog + redirect)
 
-### Dependencies
-blocks: USER-002, USER-003
-
-### ⚠ Open Question
-- Q-01: Admin role เห็นหน้านี้ไหม? (default: ❌ เฉพาะ SuperAdmin)
-
----
-
-## USER-002: Create User Form
-
-**As a** SuperAdmin
-**I want to** สร้าง user ใหม่และส่ง temp password ให้
-**So that** user สามารถ login ครั้งแรกได้
-
-### Acceptance Criteria
-- [ ] แสดงฟอร์ม modal — fields ครบ 6: ชื่อ · นามสกุล · รหัสพนักงาน · อีเมล · Role · Status
-- [ ] ทุก field required
-- [ ] Email validation onBlur (format + ซ้ำ)
-- [ ] รหัสพนักงาน validation onBlur (ซ้ำ)
-- [ ] Role dropdown: USER / Admin / SuperAdmin
-- [ ] Status radio: ACTIVE (default) / INACTIVE
-- [ ] ปุ่ม "สร้างผู้ใช้" disabled จนกว่า required ครบ
-- [ ] สำเร็จ → backend gen temp password + send email → modal ปิด → toast "สร้างผู้ใช้สำเร็จ ส่งอีเมลให้ {email} แล้ว" → row ใหม่ highlight 2s
-- [ ] ระหว่าง loading: ปิด ✕ ไม่ได้, inputs disabled
-- [ ] Esc ระหว่าง default ปิดได้, default state มี confirm ก่อนปิดถ้ามี data
-
-### Components
-| Component | Figma node |
+| Field | Value |
 |---|---|
-| `Modal/CreateUser` | `<FIGMA_NODE_URL>` |
-| `TextField/*` | reuse |
-| `Dropdown/Role` | `<FIGMA_NODE_URL>` |
-| `RadioGroup/Status` | `<FIGMA_NODE_URL>` |
-| `Button/Secondary` (ยกเลิก) | `<FIGMA_NODE_URL>` |
+| Figma — login | [`182:74610`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=182-74610), [`182:74612`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=182-74612) |
+| Figma — dialog | [`239:74547`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=239-74547) |
+| Rules | R-PWD-06, R-TP-05 |
+| Components | Login Container, Dialog (Confirm info) |
+| Notes | On dialog confirm → route to New password (PE2). On dismiss → stay on Login. |
 
-### States
-default · loading · error (email dup, emp_id dup, email format) · success · disabled · responsive
+### LEASING-AUTH-06 — Set new password (after expiry) + reuse-last guard
 
-### Dependencies
-blocked by: USER-001 (เปิดจาก)
-triggers: EMAIL-001 (ส่ง temp password)
-
----
-
-## USER-003: Reset Password Confirmation Dialog
-
-**As a** SuperAdmin
-**I want to** reset password ของ user ที่ลืม
-**So that** user ได้ temp password ใหม่ทางอีเมล
-
-### Acceptance Criteria
-- [ ] แสดง 🔑 icon + message ระบุชื่อ + รหัสพนง. + email ปลายทาง
-- [ ] กด "ยืนยัน Reset" → backend gen + ส่งอีเมล
-- [ ] สำเร็จ → dialog ปิด → toast "Reset password สำเร็จ ส่งอีเมลให้ {email} แล้ว"
-- [ ] ระหว่าง loading: "ยกเลิก" disabled, primary spinner
-- [ ] ล้มเหลว → inline error ใน dialog "ส่งอีเมลไม่สำเร็จ กรุณาลองอีกครั้ง"
-- [ ] Esc ปิดได้ (default state)
-
-### Components
-| Component | Figma node |
+| Field | Value |
 |---|---|
-| `Dialog/ResetPasswordConfirm` | `<FIGMA_NODE_URL>` |
-| `Button/Primary` · `Button/Secondary` | reuse |
-
-### States
-default · loading · error · success · responsive
-
-### Dependencies
-blocked by: USER-001 (เปิดจาก row action)
-triggers: EMAIL-001
+| Figma — default | [`189:75131`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=189-75131) |
+| Figma — filled | [`189:75133`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=189-75133) |
+| Figma — error (policy) | [`189:75135`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=189-75135) |
+| Figma — dialog (matches last) | [`329:38735`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=329-38735) |
+| Rules | R-PWD-01..R-PWD-03, R-PWD-05 |
+| Components | Text field × 2, Dialog (Confirm info) |
+| Notes | Same UI as LEASING-AUTH-03 but guard is "matches previous password" (R-PWD-05) instead of temp. |
 
 ---
 
-## EMAIL-001: Temp Password Email Template
+## User management area
 
-**As a** newly created or password-reset user
-**I want to** ได้รับ temp password ทางอีเมล
-**So that** ใช้ login ครั้งแรก/หลัง reset ได้
+### LEASING-USR-01 — User list (default + after create)
 
-### Acceptance Criteria
-- [ ] Trigger 2 จุด: หลัง Create User (USER-002), หลัง Reset Password (USER-003)
-- [ ] Subject ต่างกันตาม trigger (ดู `UXUI_DESIGN.md` §7)
-- [ ] Body มีตัวแปร: firstName, lastName, employeeId, tempPassword, loginUrl, adminEmail
-- [ ] ระบุชัด: ใช้ครั้งเดียว · หมดอายุ 7 วัน · ตั้งรหัสผ่านใหม่เมื่อ login ครั้งแรก
-- [ ] CTA button → loginUrl (HTTPS)
-- [ ] Footer "ส่งอัตโนมัติ กรุณาอย่าตอบกลับ"
-- [ ] รองรับ dark mode (mail client) — text สี dynamic
-
-### Components (HTML email — ไม่มีใน Figma component lib)
-- HTML email template — owner: Backend/DevOps
-- Design reference: `UXUI_DESIGN.md` §7
-
-### Security
-- HTTPS only · SPF/DKIM/DMARC required
-
-### Dependencies
-blocked by: USER-002 / USER-003
-
----
-
-## Story Dependency Graph
-
-```
-AUTH-001 (Login)
-   ├── AUTH-002 (Set Password)
-   │       └── AUTH-003 (Password Expired Modal) → AUTH-002
-   │
-USER-001 (User Mgmt List)
-   ├── USER-002 (Create User) ──┐
-   └── USER-003 (Reset Password)─┴── EMAIL-001 (Email)
-```
-
-## Suggested Sprint Split
-| Sprint | Stories |
+| Field | Value |
 |---|---|
-| Sprint 1 | AUTH-001, AUTH-002, AUTH-003 (auth flow ครบ) |
-| Sprint 2 | USER-001, USER-002, USER-003 (admin tools) |
-| Sprint 2 | EMAIL-001 (parallel with USER-002/003) |
+| Figma — default | [`235:11244`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=235-11244) |
+| Figma — after create | [`267:12463`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=267-12463) |
+| Rules | R-USR-01..R-USR-04 |
+| Components | Data table (rows × columns), Buttons/Basic ("+ Create User"), Search input |
+| Notes | Empty state (zero users) not yet designed — block on gap I-04. |
+
+### LEASING-USR-02 — Create user form (empty + filled + duplicate field)
+
+| Field | Value |
+|---|---|
+| Figma — empty | [`202:9059`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=202-9059) |
+| Figma — filled | [`202:89836`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=202-89836) |
+| Figma — duplicate | [`382:50855`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=382-50855) |
+| Rules | R-USR-01, R-USR-02, R-USR-04 |
+| Components | Text field, Select (Role, Status), Buttons/Basic |
+| Notes | All 7 fields required. Username + email checked unique on submit. |
+
+### LEASING-USR-03 — Confirm before save + success
+
+| Field | Value |
+|---|---|
+| Figma — confirm | [`239:62575`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=239-62575) |
+| Figma — success | [`293:95474`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=293-95474) |
+| Figma — duplicate dialog | [`382:51790`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=382-51790) |
+| Rules | R-USR-03, R-USR-04, R-TP-01, R-TP-02 |
+| Components | Dialog (Confirm info), success state of table |
+| Notes | On success: API call returns ID, temp-password email is triggered server-side. |
+
+### LEASING-USR-04 — Edit user (form + confirm + updated list)
+
+| Field | Value |
+|---|---|
+| Figma — entry | [`293:123987`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=293-123987) |
+| Figma — form | [`293:123994`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=293-123994) |
+| Figma — confirm | [`293:123998`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=293-123998) |
+| Figma — updated | [`293:123989`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=293-123989) |
+| Rules | R-USR-01, R-USR-02 |
+| Components | Text field, Select, Buttons/Basic, Dialog |
+| Notes | Username likely read-only on Edit — confirm with BA. |
+
+### LEASING-USR-05 — Reset password (modal triggered from Edit)
+
+| Field | Value |
+|---|---|
+| Figma | [`336:39954`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=336-39954) |
+| Rules | R-TP-01, R-TP-02, R-FGT-02 |
+| Components | Dialog (Confirm info) with primary brand button |
+| Notes | On confirm, server generates temp password and emails the user. UI must **not** display the new password. |
 
 ---
 
-## Handoff Checklist (ทำก่อนปิด ticket)
-- [ ] ทุก `<FIGMA_NODE_URL>` แทนที่ด้วย URL จริง (จาก Dev Mode)
-- [ ] Component name ใน Figma ตรงกับชื่อในตาราง Components
-- [ ] Tokens export ตรงกับ `design-tokens.json`
-- [ ] Acceptance criteria ทุกข้อมี assertion ใน QA test plan
-- [ ] Email template (EMAIL-001) ส่งให้ backend dev ที่ implement
-- [ ] Open Questions ใน UXUI_DESIGN.md §10 ตอบครบก่อน sprint start
+## Cross-cutting
+
+### LEASING-SES-01 — Auto logout (background)
+
+| Field | Value |
+|---|---|
+| Figma | — (no UI yet; see UXUI_DESIGN.md §7) |
+| Rules | R-SES-01, R-SES-02 |
+| Components | (proposed) toast 60s before timeout |
+| Notes | Blocked on decision I-03 (silent vs. warning toast). |
+
+---
+
+## Change Log
+
+| Date | Change | Reason |
+|---|---|---|
+| 2026-05-23 | Initial story set covering all designed screens (LEASING-AUTH-01..06, LEASING-USR-01..05, LEASING-SES-01) | Kick-off — one story per ship-able piece of UI |

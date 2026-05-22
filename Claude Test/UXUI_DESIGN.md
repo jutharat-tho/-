@@ -1,319 +1,277 @@
-# UXUI_DESIGN.md — Leasing BO: Authentication & User Management
+# UX/UI Design Spec — Leasing Design BO: User Management & Authentication
 
 **Status:** `draft`
-**Version:** 0.1
+**Related docs:** [`requirement.md`](./requirement.md) · [`figma-links.md`](./figma-links.md) · [`design-tokens.md`](./design-tokens.md)
+**Last updated:** 2026-05-23
 **Owner:** UX/UI
-**Date:** 2026-05-19
-**Approvers needed:** BA, PM, Frontend Dev Lead
+
+> Spec describes screens, states, copy, components, and accessibility notes. Business rules live in `requirement.md`. Source of truth for visuals is Figma — when this doc and Figma disagree, **Figma wins** and this doc must be updated.
 
 ---
 
-## 1. Scope
+## 1. Feature inventory
 
-ออกแบบ Authentication + User Management สำหรับ **Leasing Back Office** ตาม BRD ที่ได้รับ
-- Authentication flows (Login, First login, Forgot password via admin, Password expired)
-- Super Admin: Create User + Reset Password
-- Password policy + session policy
-
----
-
-## 2. BRD Conflict Resolution Log
-
-ระหว่างทำ Phase 1 พบ 4 จุดที่ต้อง confirm กับ PO — ผลลัพธ์ดังนี้
-
-| # | BRD เดิม | Decision สุดท้าย | สถานะ |
+| ID | Feature | Figma section | Coverage |
 |---|---|---|---|
-| C-01 | "ก่อน Auto Logout ระบบแสดง Warning Modal" | **ไม่มี modal** — auto logout เงียบๆ | confirmed by PO ⚠ UX flag |
-| C-02 | "Password ผิด >5 ครั้ง แสดง warning + บันทึก count" | **ไม่มี warning, ไม่ lock** | confirmed by PO ⚠ Security flag |
-| C-03 | Forgot password flow | **ไม่มี link** บน Login → user ติดต่อ admin | confirmed |
-| C-04 | First login → Set Password → กลับ Login | **คงไว้** ตาม BRD (ไม่ auto-login) | confirmed |
-
-> ⚠️ **UX recommends** ทบทวน C-01 (เสียข้อมูลตอน form ยาว) และ C-02 (brute force risk) กับ stakeholder ก่อน sign-off สุดท้าย
-
----
-
-## 3. Functional Requirements (จาก BRD)
-
-### 3.1 Password Policy
-- ความยาว: **8–12 ตัวอักษร**
-- ต้องมี: ≥1 ตัวพิมพ์ใหญ่ [A-Z], ≥1 ตัวพิมพ์เล็ก [a-z], ≥1 ตัวเลข [0-9], ≥1 อักขระพิเศษ (`. ! @ # $ % ^ * _ - +`)
-- ห้ามซ้ำ Password ล่าสุด 1 ตัว
-- อายุ Password: **3 เดือน** นับจากเปลี่ยนล่าสุด
-
-### 3.2 Temp Password
-- หมดอายุ **7 วัน**, ใช้ได้ **1 ครั้ง**
-- บังคับ Set Password เมื่อ login ด้วย Temp Password
-- หมดอายุ → ติดต่อ Super admin
-
-### 3.3 Session
-- Auto Logout เมื่อ **inactive 30 นาที** (ไม่มี warning ตาม C-01)
-- Logout → clear session + tokens ทั้งหมด
-
-### 3.4 User Model
-| Field | ค่า / Constraint |
-|---|---|
-| ชื่อ | required |
-| นามสกุล | required |
-| Email | required, unique, valid format |
-| รหัสพนักงาน (= Username) | required, unique |
-| Role | `USER` / `Admin` / `SuperAdmin` |
-| Status | `ACTIVE` / `INACTIVE` |
+| F-01 | Login with Temporary Password | `177:98173` | ✅ designed |
+| F-02 | Login with Password Expire | `177:98174` | ✅ designed |
+| F-03 | Set New Password | inside F-01 / F-02 | ✅ designed |
+| F-04 | Super Admin — Create User | `293:123977` | ✅ designed |
+| F-05 | Super Admin — Edit User | `293:123983` | ✅ designed |
+| F-06 | Super Admin — Reset Password | `336:39954` (modal) | ✅ designed |
+| F-07 | Forgot Password | — (process only; user contacts admin) | n/a — no UI |
+| F-08 | Auto Logout | — (background timer) | ⚠️ UX feedback TBD |
 
 ---
 
-## 4. Screen Inventory
+## 2. Screen inventory & state coverage
 
-| # | Screen | Type | ผู้ใช้ |
-|---|---|---|---|
-| 1 | Login Page | page | ทุก role |
-| 2 | Set Password Page | page | First login + Password expired |
-| 3 | Password Expired Modal | modal บน Login | ทุก role |
-| 4 | BO: User Management List | page | SuperAdmin (Admin? — ขอ confirm) |
-| 5 | Create User Form | modal | SuperAdmin |
-| 6 | Reset Password Confirmation | dialog | SuperAdmin |
-| — | Email Template (Temp Password) | non-UI | — |
+Legend for the 7-state checklist:
+- D = default · L = loading · E = empty · X = error · S = success · DIS = disabled · R = responsive
 
----
+### 2.1 Feature F-01 — Login with Temporary Password
 
-## 5. Screen × States Matrix
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| L1 | Login | ✅ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | `139:28609`, `139:28610`, `139:28611`, `182:68431`, `182:71630` |
+| L2 | New password | ✅ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | `139:29024`, `139:29025`, `139:29026` |
+| L2-DLG | Password duplicate dialog (matches temp) | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ | `329:38870` |
 
-| Screen | default | loading | empty | error | success | disabled | responsive |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Login | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ |
-| Set Password | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ |
-| Password Expired Modal | ✓ | — | — | — | — | — | ✓ |
-| User Management List | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Create User Form | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ |
-| Reset Password Confirm | ✓ | ✓ | — | ✓ | ✓ | — | ✓ |
+### 2.2 Feature F-02 — Login with Password Expire
 
----
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| PE1 | Login | ✅ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | `182:74610`, `182:74612`, `182:74614`, `189:75128` |
+| PE1-DLG | Password expired dialog | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ | `239:74547` |
+| PE2 | New password | ✅ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | `189:75131`, `189:75133`, `189:75135` |
+| PE2-DLG | Password duplicate dialog (matches last) | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ | `329:38735` |
 
-## 6. Wireframes & Specs
+### 2.3 Feature F-04 — Create User
 
-### 6.1 Login Page
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| CU1 | User List | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | n/a | ⚠️ | `235:11244`, `267:12463` |
+| CU2 | Create User form | ✅ | ⚠️ | ✅ | ✅ | n/a | ⚠️ | ⚠️ | `202:9059`, `202:89836`, `382:50855` |
+| CU2-DLG-CONFIRM | Confirm before submit | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ | `239:62575` |
+| CU2-DLG-DUP | Duplicate username/email dialog | ✅ | n/a | n/a | ✅ | n/a | n/a | ⚠️ | `382:51790` |
+| CU3 | Success — user added | ✅ | n/a | n/a | n/a | ✅ | n/a | ⚠️ | `293:95474` |
+| EMAIL | Email artifact (out-of-app preview) | ✅ | n/a | n/a | n/a | n/a | n/a | n/a | `200:8467` |
 
-**Components:** `TextField/Username`, `TextField/Password` (มี visibility toggle), `Button/Primary`
+### 2.4 Feature F-05 — Edit User
 
-**States:**
-- `default`: 2 fields ว่าง, ปุ่ม disabled
-- `loading`: spinner + "กำลังเข้าสู่ระบบ..." inputs disabled
-- `error`: inline error "รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง"
-- `success`: spinner สั้น → redirect BO ตาม role
-- `disabled`: ปุ่ม disabled จน field ครบ
-- `responsive`: mobile card padding 16px
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| EU1 | User List | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `293:123987` |
+| EU2 | Edit form | ✅ | ⚠️ | n/a | ⚠️ | n/a | ⚠️ | ⚠️ | `293:123994` |
+| EU2-DLG | Confirm before save | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ | `293:123998` |
+| EU3 | Updated list | n/a | n/a | n/a | n/a | ✅ | n/a | ⚠️ | `293:123989` |
 
-**Accessibility:** label–input association, error `aria-live="polite"`, password toggle `aria-label`
+### 2.5 Feature F-06 — Reset Password (modal triggered from EU2)
 
----
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| RP-DLG | Reset Password confirmation modal | ✅ | ⚠️ | n/a | ⚠️ | ✅ | n/a | ⚠️ | `336:39954` |
 
-### 6.2 Set Password Page
+### Gaps to close before Dev handoff
 
-**Components:** `TextField/Password` × 2 (รหัสผ่านใหม่ + ยืนยัน), `ValidationChecklist` (6 rules), `Button/Primary`
-
-**Real-time validation checklist** (update ทุก keystroke):
-1. ความยาว 8-12 ตัวอักษร
-2. ตัวพิมพ์ใหญ่ ≥1 (A-Z)
-3. ตัวพิมพ์เล็ก ≥1 (a-z)
-4. ตัวเลข ≥1 (0-9)
-5. อักขระพิเศษ ≥1 (`. ! @ # $ % ^ * _ - +`)
-6. ไม่ซ้ำกับรหัสผ่านล่าสุด
-
-**State icons:** ○ เทา = ยังไม่ผ่าน · ✓ เขียว = ผ่าน · ✗ แดง = ไม่ผ่าน (เช่นซ้ำ password เก่า)
-
-**States:**
-- `default`: ฟอร์มว่าง, checklist ○ ทั้งหมด, ปุ่ม disabled
-- `loading`: spinner + "กำลังบันทึก..."
-- `error: mismatch`: ใต้ field ยืนยัน "รหัสผ่านทั้งสองไม่ตรงกัน"
-- `error: same as old`: rule #6 → ✗ แดง
-- `success`: toast 2s "ตั้งรหัสผ่านสำเร็จ" → redirect Login
-- `disabled`: จน checklist ครบ + 2 password ตรงกัน
+| Gap | Affects | Action |
+|---|---|---|
+| No loading state for any submit action | All forms | Define button spinner / disabled style + skeleton if applicable |
+| No empty state for user list (zero users) | CU1, EU1 | Design empty illustration + CTA "Create User" |
+| No responsive variant below 1440px | All BO screens | Confirm whether BO supports anything smaller; design 1024px and 768px if yes |
+| Disabled state for inputs / buttons | Login, forms | Token exists (`text/placeholder`) — apply consistently |
+| Auto-logout warning toast (F-08) | All BO modules | Decide: silent logout vs. 1-minute warning toast |
 
 ---
 
-### 6.3 Password Expired Modal
+## 3. Flow specs
 
-Trigger: backend ตอบ password expired หลังกด login
+### 3.1 Flow F-01 — Login with Temporary Password (happy path)
 
-**Content:** ⏰ icon + "รหัสผ่านของคุณหมดอายุแล้ว กรุณาตั้งรหัสผ่านใหม่" + CTA "ตั้งรหัสผ่านใหม่" → ไป Set Password Page
-**Close (✕):** ปิดได้ แต่ login ไม่ผ่าน user อยู่ที่ Login Page เฉยๆ
-
----
-
-### 6.4 BO User Management List
-
-**Layout:** Top nav (logo + notification + profile menu) + Left sidebar + Main content
-**Main content:**
-- Page title "จัดการผู้ใช้งาน" + CTA "+ สร้างผู้ใช้ใหม่" (top right)
-- Filter bar: search input + Role dropdown + Status dropdown
-- Table columns: รหัสพนง. | ชื่อ-นามสกุล | อีเมล | Role | Status | Action (⋮)
-- Pagination: page nav + total count
-
-**Row action menu (⋮):**
-- ดูรายละเอียด
-- แก้ไข
-- Reset Password → เปิด Reset Password Confirm
-- เปลี่ยน Status
-
-**States:**
-- `default`: ตาราง + pagination
-- `loading`: skeleton 10 rows
-- `empty`: illustration + "ยังไม่มี user ในระบบ" + CTA
-- `error`: "โหลดข้อมูลไม่สำเร็จ" + ปุ่ม "ลองอีกครั้ง"
-- `success`: toast หลัง action (create/reset/status change)
-- `disabled`: row INACTIVE เทาลง + badge
-
----
-
-### 6.5 Create User Form (Modal)
-
-**Fields (required ทั้งหมด):**
-1. ชื่อ
-2. นามสกุล
-3. รหัสพนักงาน (unique, validate onBlur)
-4. อีเมล (unique, format, validate onBlur — แสดง hint "Temp Password จะถูกส่งไปอีเมลนี้")
-5. Role — dropdown: USER / Admin / SuperAdmin
-6. Status — radio: ACTIVE (default) / INACTIVE
-
-**Actions:** ยกเลิก / สร้างผู้ใช้ (primary, disabled จน field ครบ)
-
-**States:**
-- `default`: ฟอร์มว่าง, primary disabled
-- `loading`: ปุ่ม spinner "กำลังสร้าง...", ปิดไม่ได้
-- `error: email duplicate`: inline ใต้ email
-- `error: emp_id duplicate`: inline ใต้ รหัสพนักงาน
-- `error: email format`: inline (onBlur)
-- `success`: modal ปิด → toast "สร้างผู้ใช้สำเร็จ ส่งอีเมลให้ {email} แล้ว" + highlight row ใหม่ในตาราง 2s
-
----
-
-### 6.6 Reset Password Confirmation Dialog
-
-**Content:** 🔑 icon + "ต้องการ Reset Password ของ {firstName} {lastName} ({empId}) หรือไม่?" + "ระบบจะส่ง Temporary Password ไปยัง {email}"
-**Actions:** ยกเลิก / ยืนยัน Reset (primary)
-
-**States:**
-- `default`: 2 ปุ่ม
-- `loading`: primary spinner, ยกเลิก disabled
-- `error`: inline "ส่งอีเมลไม่สำเร็จ กรุณาลองอีกครั้ง"
-- `success`: dialog ปิด → toast "Reset password สำเร็จ ส่งอีเมลให้ {email} แล้ว"
-
----
-
-## 7. Email Template — Temp Password
-
-**Used in:** Create User (A), Reset Password (B)
-
-**Subject:**
-- (A) `[Leasing BO] บัญชีของคุณถูกสร้างแล้ว — รหัสผ่านชั่วคราว`
-- (B) `[Leasing BO] รีเซ็ตรหัสผ่าน — รหัสผ่านชั่วคราวใหม่`
-
-**From:** `no-reply@{company-domain}` · display name `Leasing BO`
-
-**Body variables:** `{firstName}`, `{lastName}`, `{employeeId}`, `{tempPassword}`, `{loginUrl}`, `{adminEmail}`
-
-**Body content:**
-- สวัสดี + ข้อความสถานการณ์ (created / reset)
-- รหัสพนักงาน + รหัสผ่านชั่วคราว
-- คำเตือน: ใช้ครั้งเดียว · หมดอายุ 7 วัน · ต้องตั้งรหัสใหม่ครั้งแรกที่ login
-- CTA: "เข้าสู่ระบบ Leasing BO" → `{loginUrl}`
-- Footer: "ส่งอัตโนมัติ กรุณาอย่าตอบกลับ"
-
-**Security flagged:**
-- ส่ง plain temp password — ต้อง HTTPS only
-- SPF/DKIM/DMARC ต้องตั้งให้ครบ
-
----
-
-## 8. Design Tokens (Proposed Defaults)
-
-> ⚠️ Baseline professional fintech — ปรับได้ตาม brand ตอน high-fi
-
-### Color
 ```
-primary:   500 #3B82F6 · 600 #2563EB · 700 #1D4ED8
-neutral:   0  #FFF · 50 #F9FAFB · 100 #F3F4F6 · 200 #E5E7EB · 300 #D1D5DB · 400 #9CA3AF · 500 #6B7280 · 700 #374151 · 900 #111827
-semantic:  success #10B981 · warning #F59E0B · error #EF4444 · info #3B82F6
+Email (out-of-app) → L1 Login (empty)
+  → user enters username + temp password
+  → submit
+  → [valid + not expired] → L2 New password (default)
+    → user enters new + confirm
+    → submit
+    → [meets policy + not matching temp] → save success
+    → redirect to L1 Login → user logs in with new password → BO landing
 ```
 
-### Typography
+**Decision points & matching error states:**
+
+| Decision | If false | Screen / dialog |
+|---|---|---|
+| Username/Temp password correct? | no → inline error | L1 error (`139:28611`) — "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง" |
+| Temp password expired? | yes → inline error | L1 error (`182:68431`) — "รหัสผ่านไม่ถูกต้อง หากลืมรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ" |
+| New password meets policy? | no → inline error per rule | L2 error (`139:29026`) |
+| New password ≠ temp password? | no → dialog | L2-DLG (`329:38870`) — "Password ซ้ำ" |
+
+### 3.2 Flow F-02 — Login with Password Expire (happy path)
+
 ```
-font-family-base: 'IBM Plex Sans Thai', 'Sarabun', sans-serif
-text-xs   12/16   helper
-text-sm   14/20   body small, table
-text-base 16/24   body, input
-text-lg   18/28   subtitle
-text-xl   20/28   card title
-text-2xl  24/32   page title
-text-3xl  30/36   hero
-weights:  regular 400 · medium 500 · semibold 600 · bold 700
+PE1 Login (empty)
+  → user enters username + password (which has expired)
+  → [valid credentials] → PE1-DLG "Password expired"
+    → user clicks "Set new password" → PE2 New password (default)
+      → user enters new + confirm
+      → [meets policy + ≠ last] → save success → redirect to PE1 Login → login with new password → BO landing
+    → user dismisses dialog → back to PE1 (no change)
 ```
 
-### Spacing (4px grid)
+### 3.3 Flow F-04 — Create User (happy path)
+
 ```
-1=4 · 2=8 · 3=12 · 4=16 · 5=20 · 6=24 · 8=32 · 10=40 · 12=48
+CU1 User List (default)
+  → click "+ Create User"
+  → CU2 Create form (empty)
+  → fill fields → click Save
+  → CU2-DLG-CONFIRM (preview)
+    → confirm → [unique username + email]
+      → CU3 Success → CU1 with new user row
+      → system sends temp-password email (EMAIL)
+    → confirm → [duplicate] → CU2-DLG-DUP → back to form with field flagged
 ```
 
-### Radius
-```
-sm=4 (input, badge) · md=8 (card, modal) · lg=12 (hero) · full=9999 (pill)
-```
+### 3.4 Flow F-05 / F-06 — Edit User + Reset Password
 
-### Elevation
 ```
-sm = 0 1 2 rgba(0,0,0,.05)
-md = 0 4 6 rgba(0,0,0,.07) + 0 2 4 rgba(0,0,0,.06)
-lg = 0 10 15 rgba(0,0,0,.10)   (modal)
+EU1 User List → click row "Edit"
+  → EU2 Edit form (pre-filled)
+  → either:
+    (a) modify fields → Save → EU2-DLG confirm → EU3 Updated list
+    (b) click "Reset Password" → RP-DLG → confirm
+        → system generates temp password → sends email
+        → admin returned to EU2; no password shown in UI
 ```
-
-### Component Tokens
-| Component | Token |
-|---|---|
-| Input border | `neutral-300`, focus `primary-500` (2px ring) |
-| Input padding | y `space-3`, x `space-4` |
-| Button height | medium 40 / large 48 |
-| Button primary bg | `primary-500` → hover `primary-600` → disabled `neutral-200` (text `neutral-400`) |
-| Modal max-width | 480 (form) · 400 (confirm dialog) |
-| Toast | bg `neutral-900` text `neutral-0` radius `md` shadow `lg` |
 
 ---
 
-## 9. Accessibility Notes
+## 4. Component inventory (from Figma library)
 
-- ทุก input ต้อง associate กับ label
-- Error messages ใช้ `aria-live="polite"`
-- Color contrast: text ต่อ background ≥ 4.5:1 (WCAG AA)
-- Focus state มองเห็นได้ (2px ring สี `primary-500`)
-- Password visibility toggle มี `aria-label`
-- Modal: trap focus + ปิดด้วย Esc + restore focus ตอนปิด
+| Component | Where used | Variants observed |
+|---|---|---|
+| Login Container (`Container` 251:50714) | L1, PE1 | default; with logo, language pill, form fields, primary button, version footer |
+| Text Field | L1, L2, PE1, PE2, CU2, EU2 | default · filled · error (red border + red glow + helper) |
+| Buttons/Basic | every action surface | primary brand (`#D82329` bg) — observed in `34:69` family |
+| Dialog (Confirm info) | confirm/expire/duplicate flows | icon + title + subtitle + button — `349:128206` |
+| Email artifact | sent after Create / Reset | logo + greeting + username + temp password + note |
+| Language pill | L1, PE1 | TH default; pill 100px radius, flag icon |
+| User table (data grid) | CU1, EU1 | rows × columns (Employee ID, Username, Name, Email, Role, Status, Action) — `1440x1024` |
 
----
-
-## 10. Open Questions
-
-| # | Question | Owner | Status |
-|---|---|---|---|
-| Q-01 | Admin role เห็นหน้า User Management ไหม หรือเฉพาะ SuperAdmin? | BA | open |
-| Q-02 | รองรับมือถือ scope ไหม (BO ส่วนใหญ่ desktop) | PM | open |
-| Q-03 | Email language: ไทยอย่างเดียว หรือ bilingual? | BA | open |
-| Q-04 | Login url ใน email link ไปแบบ deep link prefill หรือเปล่า | Frontend Lead | open |
-| Q-05 | Backend rate limit / CAPTCHA แม้ UI ไม่โชว์ warning (C-02) | Backend Lead | open |
+**Component naming convention for Dev handoff:**
+- Match Figma component name exactly (`Buttons/Basic`, `Text field`, `Dialog`) in code
+- Variants → props (e.g. Text field `state="default" | "error"`)
+- Tokens → CSS variables exactly as in `design-tokens.md`
 
 ---
 
-## 11. Validation Sign-off
+## 5. Copy / Microcopy
 
-| Role | Name | Signed | Date | Notes |
-|---|---|:-:|---|---|
-| BA |  | ☐ |  |  |
-| PM |  | ☐ |  |  |
-| Frontend Dev Lead |  | ☐ |  |  |
-| UX (self) |  | ☐ |  |  |
+### Error messages — Login
+
+| Trigger | Thai (canonical) | English (proposed, confirm with BA) |
+|---|---|---|
+| Invalid username or temp password | ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง | "Incorrect username or password. Please try again." |
+| Temp password expired or invalid (after multiple wrong tries) | รหัสผ่านไม่ถูกต้อง หากลืมรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ | "Incorrect password. If you forgot your password, please contact your administrator." |
+| Password policy not met | (per Figma — currently shown as inline checklist) | "Password must meet all requirements." |
+| New password matches temp | (dialog "Password ซ้ำ") | "New password cannot match your temporary password." |
+| New password matches last | (dialog "Password ซ้ำ") | "New password cannot match your previous password." |
+| Password expired (login time) | (dialog "Password expire") | "Your password has expired. Please set a new password." |
+
+### Confirmation dialogs — Create / Edit / Reset
+
+| Dialog | Title | Body | Primary CTA | Secondary |
+|---|---|---|---|---|
+| Confirm Create | "ยืนยันการสร้างผู้ใช้งาน" (TBD) | "กรุณาตรวจสอบข้อมูลก่อนยืนยัน" | ยืนยัน | ยกเลิก |
+| Confirm Edit | "ยืนยันการแก้ไขผู้ใช้งาน" (TBD) | "กรุณาตรวจสอบข้อมูลก่อนยืนยัน" | ยืนยัน | ยกเลิก |
+| Confirm Reset | "ยืนยันการรีเซ็ตรหัสผ่าน" (TBD) | "ระบบจะส่ง Temporary Password ไปยังอีเมลของผู้ใช้" | ยืนยัน | ยกเลิก |
+
+> All confirm/cancel copy needs BA sign-off — Figma shows the structure but the source-of-truth strings should come from the BA.
 
 ---
 
-## 12. Next Steps
+## 6. Accessibility notes
 
-1. ส่ง doc นี้ให้ BA/PM/Frontend Lead review → ตอบ Open Questions
-2. Resolve Open Questions → update doc
-3. ย้ายไปทำ **Figma high-fidelity** (apply tokens) — sourced จาก wireframe section 6
-4. เปิด **Dev Mode** + export tokens → handoff ใส่ STORIES.md
+### 6.1 Focus & keyboard
+
+- **Tab order on Login (L1, PE1):** Language pill → Username → Password → Show/hide password toggle → Primary button
+- **Tab order on New password (L2, PE2):** New password → Show/hide → Confirm password → Show/hide → Primary button
+- **Enter key:** submits the active form (no implicit submit on language pill)
+- **Esc key:** closes any open dialog
+- **Focus ring:** must use `border/primary` thicker or a visible outline — current Figma frames do not show a focus state; flag for design system update
+
+### 6.2 Color & contrast
+
+| Foreground / Background | Ratio | Pass? |
+|---|---|---|
+| `text/primary` `#18181B` on `background/primary` `#FFFFFF` | 16.1 : 1 | ✅ AAA |
+| `text/secondary` `#71717A` on `#FFFFFF` | 4.7 : 1 | ✅ AA |
+| `text/placeholder` `#D4D4D8` on `#FFFFFF` | 1.45 : 1 | ❌ — only acceptable as inactive placeholder; do not use for content |
+| `text/button/primary` `#FFFFFF` on `background/button/brand` `#D82329` | 4.9 : 1 | ✅ AA |
+| `text/button/critical` `#FF4545` on `#FFFFFF` | 3.6 : 1 | ⚠️ AA Large only — supplement with icon for error helper text |
+
+### 6.3 ARIA / semantics (dev guidance)
+
+- Login form → `<form>` with `aria-labelledby` pointing at the Pentor Leasing heading
+- Each input → `<label>` (not just visual text), `aria-describedby` linking the helper/error text below
+- Error message → `aria-live="polite"` so it's announced when it appears
+- Dialog → `role="dialog"` `aria-modal="true"`, focus moved to the primary CTA on open, Tab traps inside
+- Show/hide password toggle → `aria-pressed` + `aria-label="Show password" / "Hide password"`
+- Language pill → `<button>` with `aria-haspopup="listbox"` if it opens a list
+
+### 6.4 i18n notes
+
+- The product is bilingual TH/EN (language pill exists). Test copy for line-break behavior in both languages.
+- The error string "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง" is ~50 Thai chars — input width 372px holds it on one line; ensure it wraps gracefully if width is reduced.
+- Password rules listed inline on L2/PE2 must be fully localized when EN is enabled.
+
+---
+
+## 7. Interaction spec
+
+| Element | Interaction | Spec |
+|---|---|---|
+| Primary button (`Buttons/Basic`) | hover | brightness 92% (filter), no transform |
+| Primary button | active/pressed | brightness 88% |
+| Primary button | disabled | use `background/secondary-hover` bg, `text/placeholder` text |
+| Text field | focus | border `1px → 2px` `border/primary`, or apply focus ring token (TBD) |
+| Text field | error | border `border/button/critical` + `--shadow-input-error` |
+| Show/hide password | click toggle | swaps `eye-closed` ↔ `eye-open` icon; flips `type=password` ↔ `text` |
+| Dialog | open | overlay 50% black, dialog fades + scales 0.96→1 over 150ms ease-out |
+| Dialog | close | reverse, 100ms |
+| Auto-logout | trigger | (proposal — pending BA) show toast 60 sec before, "เซสชันจะหมดอายุใน 1 นาที" with "ใช้งานต่อ" CTA |
+
+---
+
+## 8. Responsive notes
+
+Current Figma frames are all `1440 × 1024`. For BO, this is acceptable as the primary target. Open questions:
+
+1. **Does BO need to work at 1280 / 1024 widths?** If yes, design needs:
+   - Login card centered with min-width 372px form column intact
+   - User table with column hide rules below 1280px
+2. **Mobile?** Not currently in scope. If marketing wants Login on mobile, design needs to be re-derived (single column, full-width inputs, etc.).
+
+---
+
+## 9. Handoff checklist (before Dev Mode)
+
+- [ ] Component names in Figma == names in code (audit during Code Connect)
+- [ ] All 7 states present per screen (see §2 gap table)
+- [ ] Tokens exported (CSS vars + Style Dictionary) — see `design-tokens.md`
+- [ ] Empty / loading / disabled designed for every form
+- [ ] Confirm/cancel copy approved by BA (see §5 table)
+- [ ] Focus state defined and documented
+- [ ] Responsive breakpoint(s) decided
+- [ ] Dev Mode enabled on file & verified
+- [ ] Story-level Figma links added to `STORIES.md`
+
+---
+
+## 10. Change Log
+
+| Date | Change | Reason |
+|---|---|---|
+| 2026-05-23 | Initial spec covering F-01 to F-06, plus accessibility, copy table, state inventory, gaps | First sync from Figma + FigJam — gaps captured for next iteration |
