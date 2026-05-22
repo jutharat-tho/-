@@ -1,0 +1,239 @@
+/**
+ * Leasing Design BO — Design Tokens (CSS Variables)
+ * Source: Figma — Leasing-Design + DS file
+ * Generated: 2026-05-20 (updated หลังอ่าน DS file)
+ *
+ * Legend ของ comment:
+ *   ✓ verified  — ดึงจาก Figma variables โดยตรง (get_variable_defs)
+ *   ≈ estimate  — อ่านจาก screenshot + interpolate — ต้อง verify จาก Figma Variables panel
+ *   ⚙ proposed  — UX เสนอเพิ่มเพื่อเติม gap (ไม่มีใน Figma)
+ */
+
+:root {
+  /* ─────────────────────────────────────────── */
+  /*  BASE                                       */
+  /* ─────────────────────────────────────────── */
+  --color-base-white: #ffffff;  /* ✓ */
+  --color-base-black: #000000;  /* ✓ */
+
+  /* ─────────────────────────────────────────── */
+  /*  PRIMARY (Pentor brand red)                 */
+  /* ─────────────────────────────────────────── */
+  --color-primary-basic: #d82329;  /* ✓ Border/Button/brand */
+  --color-primary-100:   #fde1e2;  /* ≈ */
+  --color-primary-200:   #f8b0b3;  /* ≈ */
+  --color-primary-300:   #f08487;  /* ≈ */
+  --color-primary-400:   #e76063;  /* ≈ */
+  --color-primary-500:   #db4044;  /* ≈ */
+  --color-primary-600:   #c41f25;  /* ≈ */
+  --color-primary-700:   #a8181c;  /* ≈ */
+  --color-primary-800:   #871418;  /* ≈ */
+  --color-primary-900:   #5e0f12;  /* ≈ */
+
+  /* ─────────────────────────────────────────── */
+  /*  SECONDARY (green/teal — success accent)    */
+  /* ─────────────────────────────────────────── */
+  --color-secondary-basic: #0fa172;  /* ≈ */
+  --color-secondary-100:   #d0f0e3;  /* ≈ */
+  --color-secondary-200:   #a8e0cb;  /* ≈ */
+  --color-secondary-300:   #7ecfb3;  /* ≈ */
+  --color-secondary-400:   #4dbe99;  /* ≈ */
+  --color-secondary-500:   #1aa980;  /* ≈ */
+  --color-secondary-600:   #118a68;  /* ≈ */
+  --color-secondary-700:   #0c6e54;  /* ≈ */
+  --color-secondary-800:   #08543f;  /* ≈ */
+  --color-secondary-900:   #053b2c;  /* ≈ */
+
+  /* ─────────────────────────────────────────── */
+  /*  GREY (neutral)                             */
+  /* ─────────────────────────────────────────── */
+  --color-grey-basic: #9ca3af;  /* ≈ */
+  --color-grey-100:   #fafafa;  /* ≈ */
+  --color-grey-200:   #e5e7eb;  /* ≈ */
+  --color-grey-300:   #d4d4d8;  /* ≈ */
+  --color-grey-400:   #a1a1aa;  /* ≈ */
+  --color-grey-500:   #71717a;  /* ✓ Icon/secondary */
+  --color-grey-600:   #52525b;  /* ≈ */
+  --color-grey-700:   #3f3f46;  /* ≈ */
+  --color-grey-800:   #27272a;  /* ≈ */
+  --color-grey-900:   #18181b;  /* ✓ Text/primary */
+
+  /* ─────────────────────────────────────────── */
+  /*  ORANGE (warning accent)                    */
+  /* ─────────────────────────────────────────── */
+  --color-orange-basic: #f59e0b;  /* ≈ */
+  --color-orange-100:   #fff3cd;  /* ≈ */
+  --color-orange-200:   #ffe69c;  /* ≈ */
+  --color-orange-300:   #ffcd6b;  /* ≈ */
+  --color-orange-400:   #ffb13d;  /* ≈ */
+  --color-orange-500:   #f59e0b;  /* ≈ */
+  --color-orange-600:   #cf7d00;  /* ≈ */
+  --color-orange-700:   #a36100;  /* ≈ */
+  --color-orange-800:   #75460e;  /* ≈ */
+  --color-orange-900:   #4b2c08;  /* ≈ */
+
+  /* ─────────────────────────────────────────── */
+  /*  PINK (accent — badges / tags)              */
+  /* ─────────────────────────────────────────── */
+  --color-pink-basic: #ec4899;  /* ≈ */
+  --color-pink-100:   #fdf2f8;  /* ≈ */
+  --color-pink-200:   #fce7f3;  /* ≈ */
+  --color-pink-300:   #fbcfe8;  /* ≈ */
+  --color-pink-400:   #f9a8d4;  /* ≈ */
+  --color-pink-500:   #ec4899;  /* ≈ */
+  --color-pink-600:   #db2777;  /* ≈ */
+  --color-pink-700:   #be185d;  /* ≈ */
+  --color-pink-800:   #9d174d;  /* ≈ */
+  --color-pink-900:   #831843;  /* ≈ */
+
+  /* ─────────────────────────────────────────── */
+  /*  PURPLE (accent — category labels)          */
+  /* ─────────────────────────────────────────── */
+  --color-purple-basic: #8b5cf6;  /* ≈ */
+  --color-purple-100:   #f5f3ff;  /* ≈ */
+  --color-purple-200:   #ede9fe;  /* ≈ */
+  --color-purple-300:   #ddd6fe;  /* ≈ */
+  --color-purple-400:   #c4b5fd;  /* ≈ */
+  --color-purple-500:   #8b5cf6;  /* ≈ */
+  --color-purple-600:   #7c3aed;  /* ≈ */
+  --color-purple-700:   #6d28d9;  /* ≈ */
+  --color-purple-800:   #5b21b6;  /* ≈ */
+  --color-purple-900:   #4c1d95;  /* ≈ */
+
+  /* ─────────────────────────────────────────── */
+  /*  RED (separate from Primary — likely Error) */
+  /* ─────────────────────────────────────────── */
+  --color-red-basic: #ef4444;  /* ≈ ⚠ W-22: confirm กับ Designer ว่าใช้สำหรับ semantic error */
+  --color-red-100:   #fef2f2;  /* ≈ */
+  --color-red-200:   #fee2e2;  /* ≈ */
+  --color-red-300:   #fecaca;  /* ≈ */
+  --color-red-400:   #f87171;  /* ≈ */
+  --color-red-500:   #ef4444;  /* ≈ */
+  --color-red-600:   #dc2626;  /* ≈ */
+  --color-red-700:   #b91c1c;  /* ≈ */
+  --color-red-800:   #7f1d1d;  /* ≈ */
+  --color-red-900:   #450a0a;  /* ≈ */
+
+  /* ─────────────────────────────────────────── */
+  /*  SEMANTIC ALIASES                           */
+  /* ─────────────────────────────────────────── */
+  --color-brand:   var(--color-primary-basic);
+  --color-danger:  var(--color-red-basic);
+  --color-success: var(--color-secondary-basic);
+  --color-warning: var(--color-orange-basic);
+
+  /* ─────────────────────────────────────────── */
+  /*  TEXT / ICON                                */
+  /* ─────────────────────────────────────────── */
+  --color-text-primary:    #18181b;  /* ✓ */
+  --color-text-secondary:  #71717a;  /* ≈ */
+  --color-text-muted:      #a1a1aa;  /* ≈ */
+  --color-text-inverse:    #ffffff;  /* ✓ */
+
+  --color-icon-primary:    #18181b;
+  --color-icon-secondary:  #71717a;  /* ✓ */
+
+  /* ─────────────────────────────────────────── */
+  /*  BACKGROUND / BORDER                        */
+  /* ─────────────────────────────────────────── */
+  --color-bg-primary:    #ffffff;  /* ✓ */
+  --color-bg-secondary:  #fafafa;  /* ≈ */
+  --color-bg-muted:      #f4f4f5;  /* ≈ */
+
+  --color-border-default:     #e5e7eb;  /* ≈ */
+  --color-border-input:       #d4d4d8;  /* ≈ */
+  --color-border-focus:       #d82329;  /* derived */
+  --color-border-button-brand:#d82329;  /* ✓ */
+
+  /* ─────────────────────────────────────────── */
+  /*  TYPOGRAPHY                                 */
+  /* ─────────────────────────────────────────── */
+  --font-family-primary:  "Pentor Corporate", "IBM Plex Sans Thai", "Sarabun", -apple-system, sans-serif;
+  --font-weight-regular:  400;
+  --font-weight-semibold: 600;
+
+  /* Heading (SemiBold) */
+  --font-size-h1: 60px;
+  --font-size-h2: 48px;
+  --font-size-h3: 24px;
+
+  /* Body */
+  --font-size-body-L:  16px;  /* ✓ */
+  --font-size-body-M:  14px;
+  --font-size-body-S:  12px;
+  --font-size-body-XS: 10px;
+
+  /* Button (SemiBold) */
+  --font-size-btn-XL: 24px;
+  --font-size-btn-L:  18px;
+  --font-size-btn-M:  16px;
+  --font-size-btn-S:  14px;
+  --font-size-btn-XS: 12px;
+
+  /* Link (Regular + underline) */
+  --font-size-link-L: 14px;
+  --font-size-link-M: 12px;
+  --font-size-link-S: 10px;
+
+  --line-height-tight:   1.2;
+  --line-height-default: 1.3;  /* ✓ from body L */
+  --line-height-relaxed: 1.4;
+
+  /* ─────────────────────────────────────────── */
+  /*  SPACING (4px grid)                         */
+  /* ─────────────────────────────────────────── */
+  --space-0:    0px;     /* ✓ */
+  --space-100:  4px;     /* ✓ */
+  --space-200:  8px;     /* ⚙ proposed */
+  --space-300:  12px;    /* ⚙ */
+  --space-400:  16px;    /* ✓ */
+  --space-500:  20px;    /* ⚙ */
+  --space-600:  24px;    /* ✓ */
+  --space-700:  28px;    /* ⚙ */
+  --space-800:  32px;    /* ✓ */
+  --space-1000: 40px;    /* ⚙ */
+  --space-1200: 48px;    /* ⚙ */
+
+  /* ─────────────────────────────────────────── */
+  /*  STROKE / RADIUS                            */
+  /* ─────────────────────────────────────────── */
+  --stroke-0:   0px;
+  --stroke-100: 4px;  /* ✓ */
+
+  --radius-0:   0px;  /* ✓ — DS ใช้ sharp corners */
+
+  /* Proposed radius (UX เสนอเพิ่ม) */
+  --radius-sm-proposed:   4px;
+  --radius-md-proposed:   8px;
+  --radius-lg-proposed:  12px;
+  --radius-full-proposed: 9999px;
+
+  /* ─────────────────────────────────────────── */
+  /*  ELEVATION (proposed — ไม่มีใน DS)          */
+  /* ─────────────────────────────────────────── */
+  --shadow-sm-proposed: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md-proposed: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg-proposed: 0 10px 15px rgba(0, 0, 0, 0.10);
+}
+
+/* ─── Body baseline ─── */
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body-L);
+  line-height: var(--line-height-default);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+}
+
+/* ─── Helper classes (typography) ─── */
+.text-h1 { font-size: var(--font-size-h1); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); }
+.text-h2 { font-size: var(--font-size-h2); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); }
+.text-h3 { font-size: var(--font-size-h3); font-weight: var(--font-weight-semibold); line-height: var(--line-height-default); }
+
+.text-body-L  { font-size: var(--font-size-body-L);  line-height: var(--line-height-default); }
+.text-body-M  { font-size: var(--font-size-body-M);  line-height: var(--line-height-relaxed); }
+.text-body-S  { font-size: var(--font-size-body-S);  line-height: var(--line-height-relaxed); }
+.text-body-XS { font-size: var(--font-size-body-XS); line-height: var(--line-height-relaxed); }
+
+.text-bold     { font-weight: var(--font-weight-semibold); }
+.text-regular  { font-weight: var(--font-weight-regular); }
