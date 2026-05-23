@@ -2,6 +2,7 @@
 Claude Test/requirement.md
 Claude Test/stories.html
 Claude Test/design-tokens.html
+Claude Test/user-matrix-workflow.html
 
 # Claude Code local config (anywhere in repo)
 .claude/
