@@ -44,7 +44,7 @@ Legend for the 7-state checklist:
 | PE1 | Login | ✅ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | `182:74610`, `182:74612`, `182:74614`, `189:75128` |
 | PE1-DLG | Password expired dialog | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ | `239:74547` |
 | PE2 | New password | ✅ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | `189:75131`, `189:75133`, `189:75135` |
-| PE2-DLG | Password duplicate dialog (matches last) | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ | `329:38735` |
+| ~~PE2-DLG~~ | ~~Password duplicate dialog (matches last)~~ — **DEPRECATED 2026-05-25**: rule R-PWD-05 retired, this screen no longer needed | — | — | — | — | — | — | — | `329:38735` (do not implement) |
 
 ### 2.3 Feature F-04 — Create User
 
@@ -176,8 +176,8 @@ EU1 User List → click row "Edit"
 | Invalid username or temp password | ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง | "Incorrect username or password. Please try again." |
 | Temp password expired or invalid (after multiple wrong tries) | รหัสผ่านไม่ถูกต้อง หากลืมรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ | "Incorrect password. If you forgot your password, please contact your administrator." |
 | Password policy not met | (per Figma — currently shown as inline checklist) | "Password must meet all requirements." |
-| New password matches temp | (dialog "Password ซ้ำ") | "New password cannot match your temporary password." |
-| New password matches last | (dialog "Password ซ้ำ") | "New password cannot match your previous password." |
+| New password matches temp | (dialog "Password ซ้ำ") — error code `2012` | "New password cannot match your temporary password." |
+| ~~New password matches last~~ | **REMOVED 2026-05-25** — rule R-PWD-05 retired per SA. No reuse-last check anymore. | — |
 | Password expired (login time) | (dialog "Password expire") | "Your password has expired. Please set a new password." |
 
 ### Confirmation dialogs — Create / Edit / Reset
@@ -275,3 +275,4 @@ Current Figma frames are all `1440 × 1024`. For BO, this is acceptable as the p
 | Date | Change | Reason |
 |---|---|---|
 | 2026-05-23 | Initial spec covering F-01 to F-06, plus accessibility, copy table, state inventory, gaps | First sync from Figma + FigJam — gaps captured for next iteration |
+| 2026-05-25 | Synced SA spec — deprecated PE2-DLG screen (reuse-last guard removed per R-PWD-05 retire), removed "matches last" error copy row, added error code `2012` reference. See [SA folder](file:///Users/buttar/Documents/ai/SA/) for authoritative API spec + sequence diagrams. | SA team finalized auth implementation — design must follow actual backend behavior |

@@ -69,17 +69,17 @@
 | Components | Login Container, Dialog (Confirm info) |
 | Notes | On dialog confirm → route to New password (PE2). On dismiss → stay on Login. |
 
-### LEASING-AUTH-06 — Set new password (after expiry) + reuse-last guard
+### LEASING-AUTH-06 — Set new password (after expiry) _(reuse-last guard REMOVED 2026-05-25)_
 
 | Field | Value |
 |---|---|
 | Figma — default | [`189:75131`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=189-75131) |
 | Figma — filled | [`189:75133`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=189-75133) |
 | Figma — error (policy) | [`189:75135`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=189-75135) |
-| Figma — dialog (matches last) | [`329:38735`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=329-38735) |
-| Rules | R-PWD-01..R-PWD-03, R-PWD-05 |
+| ~~Figma — dialog (matches last)~~ | ~~[`329:38735`](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design?node-id=329-38735)~~ — do not implement, R-PWD-05 retired |
+| Rules | R-PWD-01..R-PWD-03 _(R-PWD-05 retired — no reuse-last check)_ |
 | Components | Text field × 2, Dialog (Confirm info) |
-| Notes | Same UI as LEASING-AUTH-03 but guard is "matches previous password" (R-PWD-05) instead of temp. |
+| Notes | Same UI as LEASING-AUTH-03 — only format validation (R-PWD-01..03). Backend trigger=`expired` (JWT scope=`CHANGE_PASSWORD`). API: `POST /auth/change-password`. **No reuse-last guard** since R-PWD-05 retired 2026-05-25. |
 
 ---
 
@@ -158,3 +158,4 @@
 | Date | Change | Reason |
 |---|---|---|
 | 2026-05-23 | Initial story set covering all designed screens (LEASING-AUTH-01..06, LEASING-USR-01..05, LEASING-SES-01) | Kick-off — one story per ship-able piece of UI |
+| 2026-05-25 | LEASING-AUTH-06 simplified — reuse-last guard removed (R-PWD-05 retired per SA), dialog `329:38735` marked do-not-implement, rules updated to R-PWD-01..03 only | SA team finalized auth — backend no longer checks against last password |

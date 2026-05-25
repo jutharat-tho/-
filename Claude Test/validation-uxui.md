@@ -39,11 +39,13 @@ Status values: `draft` → `in_review` → `approved` → `final`.
 
 | # | Issue | Owner | Target | Status |
 |---|---|---|---|---|
-| I-01 | Confirm exact wording for "Password expire" and "Password ซ้ำ" dialogs | BA | — | open |
+| I-01 | Confirm exact wording for "Password expire" and "Password ซ้ำ" dialogs | BA | — | **partially resolved 2026-05-25** — SA defined error codes (`2012` matches-temp, `2001` invalid creds, `2002` temp expired). Wording-final still pending BA, but trigger/behavior is locked. |
 | I-02 | Decide responsive scope (BO at < 1440px?) | PM + FE Lead | — | open |
 | I-03 | Decide auto-logout UX (silent vs. 60s warning toast) | PM + BA | — | open |
 | I-04 | Design empty / loading / disabled states for all forms | UX/UI | — | open |
-| I-05 | Confirm Reset Password kills active sessions (backend behavior) | FE Lead | — | open |
+| I-05 | Confirm Reset Password kills active sessions (backend behavior) | FE Lead | — | **resolved 2026-05-25** — Yes per SA R-SES-04 single-session enforcement: any new login (incl. after Reset → re-login with new temp) kicks all prior refresh tokens. Old access tokens die within 15 min naturally. |
+| I-09 | Role naming convention drift — Figma user-matrix uses "Super Admin / Admin User / Admin Content / Marketing / Support / Credit Support / Credit Analyst / Contract / Credit Disbursement / Verify / Accounting" (11 roles). SA spec uses snake_case codes "super_admin, sale_mng, marketing, support, credit_ops, analyst, contract, verify, account" (9 roles). | BA + FE Lead | — | open (new 2026-05-25) |
+| I-10 | Confirm if `POST /auth/refresh-token` flow needs any UI feedback (current SA spec is silent). Decision: silent rotation in background, no toast/loading visible to user. | FE Lead | — | open (new 2026-05-25) |
 | I-06 | Define focus-ring token + apply across components | UX/UI | — | open |
 | I-07 | EN copy for all error/dialog strings | BA | — | open |
 | I-08 | Audit logging UI for admin actions (next release?) | PM | — | deferred |
@@ -66,3 +68,4 @@ Status values: `draft` → `in_review` → `approved` → `final`.
 | Date | Change | Reason |
 |---|---|---|
 | 2026-05-23 | Initial validation file scaffolded with approver matrix, feature status, open issues | Kick-off — issues mirror gaps captured in UXUI_DESIGN.md §2 |
+| 2026-05-25 | Synced from SA spec — partially resolved I-01 (error codes defined), resolved I-05 (single-session enforcement), opened I-09 (role naming drift) + I-10 (refresh-token UX) | SA team finalized auth implementation — propagated decisions into BRD + UXUI_DESIGN + STORIES |

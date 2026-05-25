@@ -117,8 +117,27 @@ Library key (for `search_design_system`): `lk-c68a63b1bc4f9f2d89eadb0d56ded742d7
 
 ---
 
+## Related — SA / System Spec _(non-Figma, local reference)_
+
+Authoritative API contracts + sequence diagrams from System Architect team. Lives at `/Users/buttar/Documents/ai/SA/` on UX/UI workstation (not in this repo).
+
+| File | Description |
+|---|---|
+| `SA/README.md` | Auth module overview — endpoints, session model, password policy, schema |
+| `SA/login.md` | `POST /auth/login` — 3 cases (first-time / normal / expired) + Mermaid diagrams |
+| `SA/logout.md` | `POST /auth/logout` — blacklist + Redis cleanup |
+| `SA/refresh-token.md` | `POST /auth/refresh-token` — rotation + anti-replay |
+| `SA/change-password.md` | `POST /auth/change-password` — 3 triggers (first_time / expired / voluntary) |
+| `SA/flow-auth*.puml`, `SA/sq-auth*.puml` | PlantUML flowcharts + sequence diagrams |
+
+When SA spec disagrees with Figma:
+1. Backend behavior — **SA wins** (it's the implementation contract)
+2. Visual / interaction — **Figma wins** (Figma is the visual source of truth)
+3. Copy / wording — **BA decision** (default to Figma until BA confirms)
+
 ## Change Log
 
 | Date | Change | Reason |
 |---|---|---|
 | 2026-05-23 | Initial registry created with all sections from Login & Logout, Create User, Edit User, plus FigJam Requirements board | Kick-off of UX/UI workflow session |
+| 2026-05-25 | Added "Related — SA / System Spec" section pointing at `/Users/buttar/Documents/ai/SA/` | SA team published auth spec — UX/UI needs to cross-reference for API contract |
