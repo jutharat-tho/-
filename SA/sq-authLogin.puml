@@ -1,0 +1,202 @@
+@startuml sq-authLogin
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign center
+skinparam backgroundColor #FAFAFA
+skinparam ParticipantBackgroundColor #4A90D9
+skinparam ParticipantFontColor #FFFFFF
+skinparam ParticipantBorderColor #2C5F8A
+skinparam ActorBackgroundColor #E8F4FD
+skinparam ActorBorderColor #2C5F8A
+skinparam DatabaseBackgroundColor #FCF3CF
+skinparam DatabaseFontColor #1A1A1A
+skinparam DatabaseBorderColor #C47D0A
+skinparam SequenceLifeLineBorderColor #AAAAAA
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+skinparam sequenceArrowThickness 1.5
+skinparam SequenceGroupBackgroundColor #F0F4FF
+skinparam SequenceGroupBorderColor #B0BEC5
+skinparam SequenceGroupFontColor #37474F
+skinparam SequenceGroupHeaderFontColor #37474F
+
+title <b>POST /auth/login</b>\n<i>Case 1: Temp Password | Case 2: Normal | Case 3: Password Expired</i>
+
+actor "👤 User" as User
+participant "<b>API</b>\n/auth/login" as API #4A90D9
+participant "<b>Auth</b>\nService" as SVC #7B68EE
+database "<b>Redis</b>" as Redis #FADBD8
+database "<b>MongoDB</b>" as DB #FCF3CF
+
+== 1. Validate Request ==
+
+User -> API : <b>POST</b> /auth/login\n<font color=gray>{ username, password }</font>
+activate API #D6EAF8
+
+API -> API : validate request body
+
+alt <font color=#C0392B><b>Validation Failed</b></font>
+  API --[#C0392B]> User : <font color=#C0392B><b>400 (1008)</b></font> Validation Failed
+end
+
+' ============================================================
+' TODO: Rate limit (ยังไม่ implement — comment ไว้ก่อน)
+' --------------------------------------------------------------
+' API -> Redis : INCR login_attempts:{ip} EXPIRE 60
+' activate Redis #FADBD8
+' Redis --> API : count
+' deactivate Redis
+'
+' alt <font color=#C0392B><b>Rate Limit Exceeded (count > 5)</b></font>
+'   API --[#C0392B]> User : <font color=#C0392B><b>500 (1014)</b></font> Rate limit error
+' end
+' ============================================================
+
+== 2. Find User & Check Status ==
+
+API -> SVC : login(username, password, ip)
+activate SVC #E8DAEF
+
+SVC -> DB : db.users.findOne({ username })
+activate DB #FEF9E7
+DB --> SVC : user | null
+deactivate DB
+
+alt <font color=#C0392B><b>User Not Found</b></font>
+  SVC -> DB : insert audit_log (LOGIN_FAILED)
+  activate DB #FEF9E7
+  DB --> SVC : ok
+  deactivate DB
+  SVC --[#C0392B]> API : ERR: INVALID_CREDENTIALS
+  API --[#C0392B]> User : <font color=#C0392B><b>401 (2001)</b></font> Invalid Credentials
+  note right #FFE0E0
+    ใช้ message เดียวกับ wrong password
+    <i>(ป้องกัน user enumeration)</i>
+  end note
+end
+
+alt <font color=#C0392B><b>status != ACTIVE</b></font>
+  SVC --[#C0392B]> API : ERR: INACTIVE_USER
+  API --[#C0392B]> User : <font color=#C0392B><b>403 (1007)</b></font> Inactive User
+end
+
+== 3. Branch by isTemp Flag — แล้วค่อย Verify Password ==
+
+note over SVC #FFF9C4
+  <b>DB schema (users.password):</b>
+  {
+    hashed, expiresTime,           // real (90d)
+    tempHashed, tempExpiresTime,   // temp (7d)
+    isTemp                          // flag
+  }
+  → ตรวจ <b>password.isTemp</b> ก่อน เพื่อแยกเส้นทาง
+end note
+
+alt <font color=#2980B9><b>🔵 password.isTemp = true — Temp Password User</b></font>
+
+  alt <font color=#C0392B><b>password.tempExpiresTime ≤ NOW (หมดอายุ 7 วัน)</b></font>
+    SVC --[#C0392B]> API : ERR: TEMP_PASSWORD_EXPIRED
+    API --[#C0392B]> User : <font color=#C0392B><b>401 (2002)</b></font> Temp password expired
+    note right #FFE0E0
+      ติดต่อ Super Admin
+      เพื่อขอ temp password ใหม่
+    end note
+  end
+
+  SVC -> SVC : bcrypt.Compare\n(password.tempHashed, input)
+
+  alt <font color=#C0392B><b>Temp ไม่ตรง</b></font>
+    SVC -> DB : insert audit_log (LOGIN_FAILED)
+    activate DB #FEF9E7
+    DB --> SVC : ok
+    deactivate DB
+    SVC --[#C0392B]> API : ERR: INVALID_CREDENTIALS
+    API --[#C0392B]> User : <font color=#C0392B><b>401 (2001)</b></font> Invalid Credentials
+  end
+
+  SVC -> SVC : generate JWT\nscope = "CHANGE_PASSWORD"\ntrigger = "first_time"\nTTL = 15 นาที
+  SVC -> DB : insert audit_log\n(LOGIN_TEMP_PASSWORD)
+  activate DB #FEF9E7
+  DB --> SVC : ok
+  deactivate DB
+  SVC --> API : { accessToken (limited),\ntokenScope: "CHANGE_PASSWORD",\ntrigger: "first_time",\nisTempPassword: true }
+  API --[#2980B9]> User : <font color=#2980B9><b>200</b></font> isTempPassword: true (<b>Case 1</b>)
+  note right #FCF3CF
+    <b>ไม่มี refreshToken</b>
+    Frontend redirect → /change-password
+    <i>(Temp password ใช้ซ้ำได้
+    จนกว่า set password สำเร็จ)</i>
+  end note
+
+else <font color=#27AE60><b>🟢 password.isTemp = false — Real Password User</b></font>
+
+  SVC -> SVC : bcrypt.Compare\n(password.hashed, input)
+
+  alt <font color=#27AE60><b>🟢 Real password ตรง</b></font>
+
+    SVC -> SVC : check password.expiresTime vs NOW
+
+    alt <font color=#E67E22><b>🟠 Case 3: Password Expired (90 วัน)</b></font>
+      SVC -> SVC : generate JWT\nscope = "CHANGE_PASSWORD"\ntrigger = "expired"\nTTL = 15 นาที
+      SVC -> DB : insert audit_log\n(PASSWORD_EXPIRED_FORCED_CHANGE)
+      activate DB #FEF9E7
+      DB --> SVC : ok
+      deactivate DB
+      SVC --> API : { accessToken (limited),\ntokenScope: "CHANGE_PASSWORD",\ntrigger: "expired",\npasswordExpired: true }
+      API --[#E67E22]> User : <font color=#E67E22><b>200</b></font> passwordExpired: true (<b>Case 3</b>)
+      note right #FCF3CF
+        <b>ไม่มี refreshToken</b>
+        Frontend redirect → /change-password
+      end note
+
+    else <font color=#27AE60><b>🟢 Case 2: Normal Login</b></font>
+      SVC -> SVC : generate access JWT (15m, scope=FULL)\n+ refresh JWT (<b>24h</b>)\nwith jti
+      note right of SVC #D5F5E3
+        <b>Single-session kick:</b>
+        เตะ session เก่าของ user นี้
+      end note
+      SVC -> Redis : SCAN refresh_token:{userId}:*\n→ DEL ทุกตัว
+      activate Redis #FADBD8
+      Redis --> SVC : OK
+      deactivate Redis
+      SVC -> Redis : SET refresh_token:{userId}:{newJti}\nvalue = JSON { userId, createdAt, ip, userAgent }\nEX 86400 (24h)
+      activate Redis #FADBD8
+      Redis --> SVC : OK
+      deactivate Redis
+      note right of Redis #FFF9C4
+        <b>Value (JSON):</b>
+        • userId — เจ้าของ token
+        • createdAt — ออก token เมื่อไหร่
+        • ip — IP ที่ login
+        • userAgent — browser/device
+        ใช้ audit + detect anomaly
+      end note
+      SVC -> DB : UPDATE users\nSET lastLoginAt=NOW, lastLoginIP=ip
+      activate DB #FEF9E7
+      DB --> SVC : ok
+      deactivate DB
+      SVC -> DB : insert audit_log (LOGIN_SUCCESS)
+      activate DB #FEF9E7
+      DB --> SVC : ok
+      deactivate DB
+      SVC --> API : { Full tokens + user profile,\nisTempPassword: false }
+      API --[#27AE60]> User : <font color=#27AE60><b>200</b></font> Login Success
+      note right #D5F5E3
+        Frontend → /dashboard 🎉
+      end note
+    end
+
+  else <font color=#C0392B><b>Real password ไม่ตรง</b></font>
+    SVC -> DB : insert audit_log (LOGIN_FAILED)
+    activate DB #FEF9E7
+    DB --> SVC : ok
+    deactivate DB
+    SVC --[#C0392B]> API : ERR: INVALID_CREDENTIALS
+    API --[#C0392B]> User : <font color=#C0392B><b>401 (2001)</b></font> Invalid Credentials
+  end
+
+end
+deactivate SVC
+deactivate API
+
+@enduml

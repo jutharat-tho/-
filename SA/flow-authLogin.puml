@@ -1,0 +1,127 @@
+@startuml flow-authLogin
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam ActivityBackgroundColor #E8F4FD
+skinparam ActivityBorderColor #2C5F8A
+skinparam ActivityDiamondBackgroundColor #FFF9C4
+skinparam ActivityDiamondBorderColor #F0C000
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+
+title <b>POST /auth/login</b>\n<i>Case 1: First-time (Temp Password) | Case 2: Normal | Case 3: Password Expired</i>
+
+start
+
+:Client ส่ง <b>POST</b> /auth/login\n{ username, password };
+
+if (Validate body?) then (ไม่ผ่าน)
+  #FADBD8:<b>400 (1008)</b> Validation Failed;
+  stop
+endif
+
+' ============================================================
+' TODO: Rate limit (ยังไม่ implement — comment ไว้ก่อน)
+' --------------------------------------------------------------
+' :Rate limit: Redis INCR\nlogin_attempts:ip EXPIRE 60;
+'
+' if (count > 5?) then (เกิน)
+'   #FADBD8:<b>500 (1014)</b> Rate limit error;
+'   stop
+' endif
+' ============================================================
+
+:MongoDB findOne: users { username };
+
+if (พบ user?) then (ไม่พบ)
+  :Audit: LOGIN_FAILED (user_not_found);
+  #FADBD8:<b>401 (2001)</b> Invalid credentials;
+  note right #FFE0E0
+    ใช้ message เดียวกับ wrong password
+    <i>(ป้องกัน user enumeration)</i>
+  end note
+  stop
+endif
+
+if (status == ACTIVE?) then (ไม่)
+  #FADBD8:<b>403 (1007)</b> Inactive user;
+  stop
+endif
+
+note right #FFF9C4
+  <b>DB schema (users.password):</b>
+  {
+    hashed,            // real password hash
+    expiresTime,       // real password expiry (current+90d)
+    tempHashed,        // temp password hash
+    tempExpiresTime,   // temp password expiry (current+7d)
+    isTemp             // true=ใช้ temp, false=ใช้ real
+  }
+end note
+
+if (password.isTemp?) then (<b>true</b> — Temp Password User)
+
+  if (password.tempExpiresTime > NOW?) then (ยังไม่หมดอายุ)
+
+    :bcrypt.Compare(password.tempHashed, input);
+
+    if (Temp password ตรง?) then (ตรง — <b>Case 1</b>)
+      :Generate JWT\nscope = "CHANGE_PASSWORD"\ntrigger = "first_time"\nTTL = 15 นาที;
+      :Audit: LOGIN_TEMP_PASSWORD;
+      #FCF3CF:<b>200</b> OK\nisTempPassword: true\ntokenScope: "CHANGE_PASSWORD"\ntrigger: "first_time"\n<i>(ไม่มี refreshToken)</i>;
+      note right #FCF3CF
+        Frontend redirect → /change-password
+        (Temp password ใช้ซ้ำได้
+        จนกว่า set password สำเร็จ)
+      end note
+      stop
+    else (ไม่ตรง)
+      :Audit: LOGIN_FAILED (wrong_password);
+      #FADBD8:<b>401 (2001)</b> Invalid credentials;
+      stop
+    endif
+
+  else (หมดอายุ >7 วัน)
+    #FADBD8:<b>401 (2002)</b> Temp password expired;
+    note right #FFE0E0
+      ติดต่อ Super Admin
+      เพื่อขอ temp password ใหม่
+    end note
+    stop
+  endif
+
+else (<b>false</b> — Real Password User)
+
+  :bcrypt.Compare(password.hashed, input);
+
+  if (Password ปกติตรง?) then (ตรง)
+
+    :เปรียบเทียบ password.expiresTime vs NOW;
+
+    if (Password หมดอายุ?) then (ใช่ — <b>Case 3</b>)
+      :Generate JWT\nscope = "CHANGE_PASSWORD"\ntrigger = "expired"\nTTL = 15 นาที;
+      :Audit: PASSWORD_EXPIRED_FORCED_CHANGE;
+      #FCF3CF:<b>200</b> OK\npasswordExpired: true\ntokenScope: "CHANGE_PASSWORD"\ntrigger: "expired"\n<i>(ไม่มี refreshToken)</i>;
+      note right #FCF3CF
+        Frontend redirect → /change-password
+      end note
+      stop
+    else (ไม่ — <b>Case 2</b>)
+      :Generate JWT pair:\nAccess TTL 15m (scope=FULL)\n+ Refresh TTL <b>8h</b>;
+      ' :<b>Single-session kick:</b>\nRedis SCAN refresh_token:userId:*\n→ DEL ทุกตัว (เตะ session เก่า);
+      ' :Redis SET refresh_token:userId:newJti\nvalue = JSON {\n  userId, createdAt,\n  ip, userAgent\n}\nEX 86400 (24h);
+      ' :MongoDB UPDATE users\nSET lastLoginAt=NOW,\nlastLoginIP=ip;
+      :Audit: LOGIN_SUCCESS;
+      #D5F5E3:<b>200</b> OK\nFull tokens + user profile\nisTempPassword: false\npasswordExpired: false;
+      stop
+    endif
+
+  else (ไม่ตรง)
+    :Audit: LOGIN_FAILED (wrong_password);
+    #FADBD8:<b>401 (2001)</b> Invalid credentials;
+    stop
+  endif
+
+endif
+
+@enduml

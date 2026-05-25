@@ -1,0 +1,97 @@
+@startuml flow-authLogout
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam ActivityBackgroundColor #E8F4FD
+skinparam ActivityBorderColor #2C5F8A
+skinparam ActivityDiamondBackgroundColor #FFF9C4
+skinparam ActivityDiamondBorderColor #F0C000
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+
+title <b>POST /auth/logout</b>\n<i>Blacklist access token JTI + ลบ refresh token (ถ้าส่งมาด้วย)</i>
+
+start
+
+:Client ส่ง <b>POST</b> /auth/logout\n<font color=gray>Authorization: Bearer {accessToken}\nBody: { refreshToken? }</font>;
+
+if (มี Authorization Bearer?) then (ไม่มี)
+  #FADBD8:<b>401 (1001)</b> Unauthorized;
+  stop
+endif
+
+:Parse + verify JWT signature;
+
+if (Token signature valid?) then (ไม่)
+  #FADBD8:<b>401 (1002)</b> Access token invalid;
+  stop
+endif
+
+:Redis GET token_blacklist:{jti};
+
+if (อยู่ใน blacklist?) then (ใช่)
+  #FADBD8:<b>401 (1002)</b> Token revoked;
+  note right #FFE0E0
+    Idempotent: เรียก logout ซ้ำด้วย
+    token เดิม → ครั้งแรกสำเร็จ
+    ครั้งถัดไป token อยู่ใน blacklist แล้ว
+  end note
+  stop
+endif
+
+:ttlRemaining = exp - NOW();
+
+if (ttlRemaining <= 0?) then (หมดอายุแล้ว)
+  #D5F5E3:<b>200</b> OK (no-op)\nToken หมดอายุตามธรรมชาติ;
+  note right #D5F5E3
+    Edge case — token หมดอายุระหว่าง
+    request ส่งมา ถึงแม้ logout ไม่ทำ
+    อะไรแล้ว ก็ตอบ 200 เพื่อหลีกเลี่ยง
+    FE แจ้งสถานะไม่ตรง
+  end note
+  stop
+endif
+
+:Redis <b>SET token_blacklist:{jti}</b> = 1\nEX ttlRemaining;
+note right #FFF9C4
+  TTL = ttlRemaining (≤ 15 นาที)
+  Redis ลบเองหลัง access token
+  หมดอายุตามธรรมชาติ
+  → ไม่ต้อง blacklist forever
+end note
+
+if (Body มี refreshToken?) then (มี)
+  :Parse refreshToken → refreshJti;
+
+  if (Refresh signature valid?) then (ไม่)
+    #FCF3CF:Skip — ไม่ลบ refresh\n(ไม่ fail ทั้ง request);
+    note left #FFF9C4
+      Best-effort cleanup — access token
+      blacklist สำเร็จไปแล้ว ไม่ rollback
+    end note
+  else (valid)
+    :Redis <b>DEL refresh_token:{userId}:{refreshJti}</b>;
+    note right #FFF9C4
+      ลบ session ของ device ปัจจุบัน
+      (device อื่นที่ใช้ user เดียวกัน
+      ยังใช้งานต่อได้)
+    end note
+  endif
+else (ไม่มี)
+  :Skip — ไม่มี refresh ให้ลบ;
+endif
+
+:MongoDB insert audit_log\n{ action: "LOGOUT",\n  userId, jti, ip, userAgent };
+
+#D5F5E3:<b>200 OK</b>\n{ loggedOut: true,\n  loggedOutAt: NOW };
+
+note right #D5F5E3
+  <b>Frontend behavior:</b>
+  • Clear accessToken + refreshToken จาก storage
+  • Redirect → /login
+  • ห้าม cache state ของหน้าก่อนหน้า
+end note
+
+stop
+
+@enduml

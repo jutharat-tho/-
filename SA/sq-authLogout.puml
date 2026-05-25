@@ -1,0 +1,148 @@
+@startuml sq-authLogout
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign center
+skinparam backgroundColor #FAFAFA
+skinparam ParticipantBackgroundColor #4A90D9
+skinparam ParticipantFontColor #FFFFFF
+skinparam ParticipantBorderColor #2C5F8A
+skinparam ActorBackgroundColor #E8F4FD
+skinparam ActorBorderColor #2C5F8A
+skinparam DatabaseBackgroundColor #F5A623
+skinparam DatabaseFontColor #FFFFFF
+skinparam DatabaseBorderColor #C47D0A
+skinparam SequenceLifeLineBorderColor #AAAAAA
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+skinparam sequenceArrowThickness 1.5
+skinparam SequenceGroupBackgroundColor #F0F4FF
+skinparam SequenceGroupBorderColor #B0BEC5
+skinparam SequenceGroupFontColor #37474F
+skinparam SequenceGroupHeaderFontColor #37474F
+
+title <b>POST /auth/logout</b>\n<i>Blacklist access JTI + DEL refresh (best-effort) + audit + FE clear-and-redirect</i>
+
+actor "👤 User" as User
+participant "Frontend\n(Vue 3)" as FE
+participant "API\n/auth/logout" as API
+participant "JWT\nMiddleware" as MW
+participant "Auth\nService" as SVC
+database "Redis" as Redis
+database "MongoDB" as DB
+
+== 1. User trigger logout ==
+
+User -> FE : คลิก "ออกจากระบบ"\n(menu / topbar)
+FE -> FE : กัน double-click\n(disable button)
+
+FE -> API : <b>POST</b> /auth/logout\nAuthorization: Bearer {accessToken}\nBody: { refreshToken }
+activate API
+
+== 2. Authenticate access token ==
+
+API -> MW : validate access token
+activate MW
+
+MW -> MW : parse JWT + verify signature
+
+alt <font color=#C0392B><b>signature ผิด / malformed</b></font>
+  MW --[#C0392B]> API : ERR_INVALID_TOKEN
+  API --[#C0392B]> FE : <font color=#C0392B><b>401 (1002)</b></font> Access token invalid
+  FE -> FE : ถือว่า logout สำเร็จ\nclear tokens แล้ว redirect
+  FE --[#C0392B]> User : redirect /login
+end
+
+MW -> Redis : GET token_blacklist:{jti}
+activate Redis #FADBD8
+Redis --> MW : nil | "1"
+deactivate Redis
+
+alt <font color=#C0392B><b>อยู่ใน blacklist แล้ว</b></font>
+  MW --[#C0392B]> API : ERR_TOKEN_REVOKED
+  API --[#C0392B]> FE : <font color=#C0392B><b>401 (1002)</b></font> Token revoked
+  note right of FE #FCF3CF
+    Idempotent — เรียก logout ครั้งที่ 2
+    ด้วย token เดิม FE handle เหมือน success
+  end note
+  FE --[#C0392B]> User : redirect /login
+end
+
+MW --> API : claims { userId, jti, exp }
+deactivate MW
+
+== 3. Calculate TTL + blacklist access JTI ==
+
+API -> SVC : logout(userId, jti, exp, refreshToken?)
+activate SVC
+
+SVC -> SVC : ttlRemaining = exp - NOW()
+
+alt <font color=#1E8449><b>ttlRemaining <= 0 (token หมดอายุ)</b></font>
+  SVC --> API : SUCCESS (no-op)
+  API --> FE : <font color=#1E8449><b>200 OK</b></font> (no-op)
+  note right of SVC #FFF9C4
+    หลีกเลี่ยง edge case ที่ token
+    หมดอายุระหว่าง request ส่งมา —
+    FE ไม่ต้องเห็น error
+  end note
+end
+
+SVC -> Redis : <b>SET token_blacklist:{jti}</b> = 1\nEX ttlRemaining
+activate Redis #FADBD8
+Redis --> SVC : OK
+deactivate Redis
+
+note right of SVC #FFF9C4
+  TTL ≤ 15 นาที (access token TTL)
+  Redis ลบเอง — ไม่ blacklist forever
+end note
+
+== 4. Best-effort: ลบ refresh token ==
+
+opt body มี refreshToken
+  SVC -> SVC : parse refreshToken → refreshJti
+
+  alt <font color=#E67E22><b>refresh signature ผิด</b></font>
+    SVC -> SVC : skip — ไม่ rollback access blacklist
+    note right of SVC #FCF3CF
+      Best-effort: access blacklist สำเร็จไปแล้ว
+      ไม่ fail request ทั้งหมดเพราะ refresh พัง
+    end note
+  else valid
+    SVC -> Redis : <b>DEL refresh_token:{userId}:{refreshJti}</b>
+    activate Redis #FADBD8
+    Redis --> SVC : 1 | 0
+    deactivate Redis
+    note right of Redis #FFF9C4
+      ลบเฉพาะ session ของ device นี้
+      device อื่น (user เดียวกัน) ยังใช้ได้
+    end note
+  end
+end
+
+== 5. Audit + Response ==
+
+SVC -> DB : insert audit_log\n{ action: "LOGOUT",\n  userId, jti, ip, userAgent }
+activate DB #FEF9E7
+DB --> SVC : ok
+deactivate DB
+
+SVC --> API : SUCCESS
+deactivate SVC
+
+API --> FE : <font color=#1E8449><b>200 OK</b></font>\n{ loggedOut: true, loggedOutAt }
+deactivate API
+
+== 6. FE cleanup + redirect ==
+
+FE -> FE : Clear accessToken + refreshToken\nจาก storage (localStorage / Pinia / memory)
+FE -> FE : Reset Pinia user store
+FE -> FE : ห้าม cache route ก่อนหน้า
+
+FE -> User : redirect /login
+note right of FE #D5F5E3
+  Logout เสร็จสมบูรณ์ —
+  user เข้าระบบใหม่ได้
+end note
+
+@enduml

@@ -1,0 +1,254 @@
+@startuml sq-authRefreshToken
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign center
+skinparam backgroundColor #FAFAFA
+skinparam ParticipantBackgroundColor #4A90D9
+skinparam ParticipantFontColor #FFFFFF
+skinparam ParticipantBorderColor #2C5F8A
+skinparam ActorBackgroundColor #E8F4FD
+skinparam ActorBorderColor #2C5F8A
+skinparam DatabaseBackgroundColor #F5A623
+skinparam DatabaseFontColor #FFFFFF
+skinparam DatabaseBorderColor #C47D0A
+skinparam SequenceLifeLineBorderColor #AAAAAA
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+skinparam sequenceArrowThickness 1.5
+skinparam SequenceGroupBackgroundColor #F0F4FF
+skinparam SequenceGroupBorderColor #B0BEC5
+skinparam SequenceGroupFontColor #37474F
+skinparam SequenceGroupHeaderFontColor #37474F
+
+title <b>POST /auth/refresh</b>\n<i>Client + Server end-to-end with single-flight lock</i>\n<i>Access 15m | Refresh 8h sliding</i>
+
+' ============================================================
+' 🟢 หน้าบ้าน — Client
+' ============================================================
+actor "👤 User" as User
+participant "<b>Frontend</b>\n(Vue 3 + Axios)" as FE #019267
+' participant "<b>🔒 Refresh\nLock</b>" as Lock #95A5A6  ' TODO: single-flight — implement ทีหลัง
+
+' ============================================================
+' 🔵 หลังบ้าน — Server
+' ============================================================
+participant "<b>API</b>" as API #2196F3
+participant "<b>Auth\nService</b>" as SVC #2196F3
+database "<b>Redis</b>" as Redis #E74C3C
+database "<b>MongoDB</b>" as DB #F5A623
+
+== 1. Pre-flight Check ==
+
+User -> FE : trigger action\n(open /users page)
+activate FE #D6EAF8
+
+FE -> FE : check accessToken in storage
+
+alt <font color=#C0392B><b>No token</b></font>
+  FE --[#C0392B]> User : redirect → /login
+end
+
+== 2. Original API Request ==
+
+FE -> API : <b>GET</b> /users\n<font color=gray>Authorization: Bearer {accessToken}</font>
+activate API #D6EAF8
+API --> FE : response
+deactivate API
+
+note over FE, API #FFF9C4
+  <b>Check response — Conventional order:</b>
+  1. 2xx → success
+  2. 401 (1003) → trigger refresh ⬇️
+  3. 401 (1001/1002) → logout
+  4. 403 (1007) inactive → logout
+  5. 403 (1006) no_permission → show error
+  6. 400 (1008/1009/1010) → field error
+  7. 404 (1011) → not found
+  8. 5xx (1012-1015) → server error toast
+end note
+
+alt <font color=#27AE60><b>1. 2xx success</b></font>
+  FE --[#27AE60]> User : render result
+end
+
+note over FE, API #E8F8F0
+  ⬇️ <b>2. 401 (1003) access_token_expired</b> → ไปต่อ refresh flow ⬇️
+end note
+
+alt <font color=#C0392B><b>3. 401 (1001/1002) missing / invalid token</b></font>
+  FE -> FE : clear tokens
+  FE --[#C0392B]> User : redirect /login
+end
+
+alt <font color=#C0392B><b>4. 403 (1007) inactive_user (account ถูก disable)</b></font>
+  FE -> FE : clear tokens
+  FE --[#C0392B]> User : redirect /login\n"บัญชีถูกปิดการใช้งาน"
+end
+
+alt <font color=#E67E22><b>5. 403 (1006) no_permission</b></font>
+  FE --[#E67E22]> User : Show "ไม่มีสิทธิ์เข้าถึงฟีเจอร์นี้"\n<b>(no logout — limited access)</b>
+end
+
+alt <font color=#E67E22><b>6. 400 (1008/1009/1010) validation / business error</b></font>
+  FE --[#E67E22]> User : Show field-level error\n<b>(no logout — แก้ข้อมูลแล้ว resubmit)</b>
+  note right of FE #FFF9C4
+    1008 validation_failed → field errors จาก errorData[]
+    1009 invalid_data → "ข้อมูลที่ระบุไม่ถูกต้อง"
+    1010 duplicate_data → "มีข้อมูลนี้อยู่ในระบบแล้ว"
+  end note
+end
+
+alt <font color=#E67E22><b>7. 404 (1011) data_not_found</b></font>
+  FE --[#E67E22]> User : Show "ไม่พบข้อมูลที่ต้องการ"\n<b>(no logout)</b>
+end
+
+alt <font color=#E67E22><b>8. 5xx (1012/1013/1014/1015) server error</b></font>
+  FE --[#E67E22]> User : Show error toast\n"ระบบขัดข้องชั่วคราว"\n<b>(no logout — token ยังใช้ได้)</b>
+  note right of FE #FFF9C4
+    User กด retry → ยิง request เดิมอีกที
+    Tokens ไม่ถูก clear
+  end note
+end
+
+' ============================================================
+' TODO: Single-flight lock — comment ไว้ก่อน implement ทีหลัง
+' Dev น่าจะรู้อยู่แล้ว — ป้องกัน parallel refresh เจอ replay
+' ------------------------------------------------------------
+' == 3. Single-Flight Refresh ==
+'
+' FE -> Lock : tryAcquire(refreshLock)
+' activate Lock #FCF3CF
+'
+' alt <font color=#F39C12><b>Lock held by another request</b></font>
+'   Lock --[#F39C12]> FE : wait...
+'   note right of Lock #FFF9C4
+'     parallel request เพิ่ง refresh ไปก่อน
+'   end note
+'   Lock --[#F39C12]> FE : ✅ unlocked (with new tokens in store)
+'   FE -> FE : use latest tokens
+'   FE -> API : retry GET /users (new Bearer)
+'   activate API #D6EAF8
+'   API --[#27AE60]> FE : 200 OK
+'   deactivate API
+'   FE --[#27AE60]> User : render result 🎉
+' else <font color=#27AE60><b>Lock acquired</b></font>
+'   Lock --[#27AE60]> FE : ✅ acquired (this request will refresh)
+' end
+' deactivate Lock
+' ============================================================
+
+== 3. Server Processing — /auth/refresh ==
+
+FE -> API : <b>POST</b> /auth/refresh\n<font color=gray>{ refreshToken }</font>
+activate API #FCE4EC
+API -> SVC : refresh(refreshToken, ip)
+activate SVC #FCE4EC
+
+SVC -> SVC : <b>1.</b> verify signature + type == refresh
+
+alt <font color=#C0392B><b>signature/format/type invalid</b></font>
+  SVC --[#C0392B]> API : ERR_REFRESH_INVALID
+  API --[#C0392B]> FE : <font color=#C0392B><b>401 (1004)</b></font> refresh_token_invalid
+end
+
+SVC -> SVC : <b>2.</b> check exp claim ≥ NOW
+
+alt <font color=#E67E22><b>exp < NOW (idle 8h+)</b></font>
+  SVC --[#E67E22]> API : ERR_REFRESH_EXPIRED
+  API --[#E67E22]> FE : <font color=#E67E22><b>401 (1005)</b></font> refresh_token_expired
+end
+
+SVC -> Redis : GET refresh_token:{userId}:{jti}
+activate Redis #FADBD8
+Redis --> SVC : stored_data | nil
+deactivate Redis
+
+alt <font color=#C0392B><b>nil → REPLAY suspected</b></font>
+  note right of SVC #FFE0E0
+    JWT ยัง valid แต่ Redis key หาย
+    = ถูก rotate ไปก่อนแล้ว
+  end note
+  SVC -> Redis : SCAN+DEL refresh_token:{userId}:*\n(revoke ทุก session)
+  activate Redis #FADBD8
+  Redis --> SVC : OK
+  deactivate Redis
+  SVC -> DB : audit_log\n(SUSPICIOUS_REFRESH_REPLAY)
+  activate DB #FEF9E7
+  DB --> SVC : ok
+  deactivate DB
+  SVC --[#C0392B]> API : ERR_TOKEN_REPLAY
+  API --[#C0392B]> FE : <font color=#C0392B><b>401 (2009)</b></font> token_replay
+end
+
+SVC -> DB : db.users.findOne({ _id: userId })
+activate DB #FEF9E7
+DB --> SVC : user
+deactivate DB
+
+alt <font color=#C0392B><b>status != ACTIVE</b></font>
+  SVC -> Redis : DEL refresh_token:{userId}:{jti}
+  activate Redis #FADBD8
+  Redis --> SVC : OK
+  deactivate Redis
+  SVC --[#C0392B]> API : ERR_INACTIVE
+  API --[#C0392B]> FE : <font color=#C0392B><b>403 (1007)</b></font> inactive_user
+end
+
+SVC -> SVC : generate access (15m, scope=FULL)\n+ refresh (8h, new jti)
+
+SVC -> Redis : <b>Lua atomic:</b>\nDEL refresh_token:{userId}:{old_jti}\nSET refresh_token:{userId}:{new_jti}\nEX 28800 (8h sliding)
+activate Redis #FADBD8
+Redis --> SVC : OK | ERROR
+deactivate Redis
+
+alt <font color=#E67E22><b>Redis / DB ล่ม (any step)</b></font>
+  note right of SVC #FFE0E0
+    Infra failure ที่ step ใดๆ ก็ตาม:
+    Redis GET / DB findOne / Redis Lua
+    → return 5xx ทันที (no logout)
+  end note
+  SVC --[#E67E22]> API : ERR_SERVER_ERROR
+  API --[#E67E22]> FE : <font color=#E67E22><b>500 (1012/1013)</b></font> server_error
+end
+
+SVC -> DB : audit_log (TOKEN_REFRESH)
+activate DB #FEF9E7
+DB --> SVC : ok
+deactivate DB
+
+SVC --> API : { accessToken, refreshToken, expiresIn: 900 }
+deactivate SVC
+API --[#27AE60]> FE : <font color=#27AE60><b>200 OK</b></font>
+deactivate API
+
+== 4. Client Post-Refresh ==
+
+FE -> FE : save new tokens\n(ทับของเก่า — สำคัญ!)
+' FE -> Lock : release + notify waiters  ' TODO: single-flight
+
+FE -> API : retry GET /users (new Bearer)
+activate API #D6EAF8
+API --[#27AE60]> FE : 200 OK
+deactivate API
+
+FE --[#27AE60]> User : render result 🎉
+deactivate FE
+
+note over User, DB #FFF9C4
+  <b>Error paths summary — FE behavior:</b>
+
+  <b>Logout (clear tokens) cases:</b>
+  • <b>401 (1001/1002)</b> token missing/invalid → /login "กรุณา login ใหม่"
+  • <b>401 (1004)</b> refresh invalid → /login "กรุณา login ใหม่"
+  • <b>401 (1005)</b> idle 8h+ → /login "Session หมดอายุ"
+  • <b>401 (2009)</b> replay → broadcast logout ทุก tab + /login "⚠️ ตรวจพบความผิดปกติ"
+  • <b>403 (1007)</b> inactive_user → /login "บัญชีถูกปิดการใช้งาน"
+
+  <b>No logout (show error) cases:</b>
+  • <b>400 (1008/1009/1010)</b> validation/business → show field error, allow resubmit
+  • <b>403 (1006)</b> no_permission → "ไม่มีสิทธิ์เข้าถึงฟีเจอร์นี้"
+  • <b>404 (1011)</b> data_not_found → "ไม่พบข้อมูลที่ต้องการ"
+  • <b>5xx (1012/1013/1014/1015)</b> server error → toast "ระบบขัดข้องชั่วคราว" + retry
+end note
+
+@enduml

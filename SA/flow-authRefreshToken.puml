@@ -1,0 +1,191 @@
+@startuml flow-authRefreshToken
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam ActivityBackgroundColor #E8F4FD
+skinparam ActivityBorderColor #2C5F8A
+skinparam ActivityDiamondBackgroundColor #FFF9C4
+skinparam ActivityDiamondBorderColor #F0C000
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+
+title <b>POST /auth/refresh — Combined Flow</b>\n<i>Client trigger conditions + Server processing + Client handling</i>\n<i>Access 15m | Refresh 8h sliding (BA rule: idle 8h+ = auto logout)</i>
+
+start
+
+' ============================================================
+' 🟢 หน้าบ้าน — Client Trigger
+' ============================================================
+
+:User action ใน BO\n(e.g. open /users, click button);
+
+if (Client: มี accessToken\nใน storage?) then (ไม่มี)
+  #FADBD8:Redirect → /login;
+  stop
+endif
+
+:Send API request\n<font color=gray>Authorization: Bearer {accessToken}</font>;
+
+note right #FFF9C4
+  <b>Check response — Conventional order:</b>
+  1. 2xx → success
+  2. 401 (1003) → trigger refresh (fall through)
+  3. 401 (1001/1002) → logout
+  4. 403 (1007) → logout (inactive)
+  5. 403 (1006) → show "no permission"
+  6. 400 (1008/1009/1010) → field error
+  7. 404 (1011) → not found
+  8. 5xx (1012-1015) → server error toast
+end note
+
+if (Server response?) then (2xx success)
+  #D5F5E3:<b>Return</b> ให้ caller (success);
+  stop
+elseif (401 (1003)?\naccess_token_expired) then (ใช่)
+  :→ ไปต่อ refresh flow\n(ดูด้านล่าง);
+elseif (401 (1001/1002)?\nmissing / invalid token) then (ใช่)
+  #FADBD8:Clear tokens → /login;
+  stop
+elseif (403 (1007)?\ninactive_user) then (ใช่)
+  #FADBD8:Clear tokens → /login\n'บัญชีถูกปิดการใช้งาน';
+  note right #FFE0E0
+    Account ถูก disable ระหว่าง session
+    → ต้อง logout (user เข้าใช้ต่อไม่ได้)
+  end note
+  stop
+elseif (403 (1006)?\nno_permission) then (ใช่)
+  #FCF3CF:Show error\n'ไม่มีสิทธิ์เข้าถึงฟีเจอร์นี้'\n<b>(no logout — limited access)</b>;
+  note right #FFF9C4
+    User ไม่มีสิทธิ์เฉพาะ feature นี้
+    แต่ feature อื่นยังใช้ได้
+  end note
+  stop
+elseif (400 (1008/1009/1010)?\nvalidation / business error) then (ใช่)
+  #FCF3CF:Show field-level error to user\n<b>(no logout — แก้ข้อมูลแล้ว resubmit)</b>;
+  note right #FFF9C4
+    1008 validation_failed → field errors จาก errorData[]
+    1009 invalid_data → "ข้อมูลที่ระบุไม่ถูกต้อง"
+    1010 duplicate_data → "มีข้อมูลนี้อยู่ในระบบแล้ว"
+  end note
+  stop
+elseif (404 (1011)?\ndata_not_found) then (ใช่)
+  #FCF3CF:Show 'ไม่พบข้อมูลที่ต้องการ'\n<b>(no logout)</b>;
+  stop
+else (5xx (1012-1015) server error)
+  #FCF3CF:Show error toast\n'ระบบขัดข้องชั่วคราว'\n<b>(no logout — token ยังใช้ได้)</b>;
+  note right #FFF9C4
+    User กด retry → กลับไป Send API request
+    Tokens ยังไม่ถูก clear (server's fault)
+  end note
+  stop
+endif
+
+note right #FFF9C4
+  <b>Got 401 (1003) access_token_expired</b>
+  → เริ่มกระบวนการ refresh
+end note
+
+if (มี refreshToken\nใน storage?) then (ไม่มี)
+  #FADBD8:Clear tokens → /login;
+  stop
+endif
+
+' ============================================================
+' TODO: Single-flight lock — ป้องกัน parallel refresh ที่จะโดน
+' server ตี replay → revoke ทุก session (false-positive logout)
+' Dev น่าจะรู้อยู่แล้ว — implement ทีหลังเมื่อ FE พร้อม
+' (Axios interceptor + Promise queue)
+' ------------------------------------------------------------
+' if (มี /auth/refresh\nกำลังรันอยู่?\n<i>(single-flight lock)</i>) then (ใช่)
+'   :Wait current refresh\n+ reuse new tokens จาก store;
+'   :Retry original request\nด้วย access ใหม่;
+'   #D5F5E3:<b>Return</b> result 🎉;
+'   stop
+' endif
+'
+' :Acquire refresh lock;
+' ============================================================
+
+:<b>POST</b> /auth/refresh\n<font color=gray>Body: { refreshToken }</font>;
+
+' ============================================================
+' 🔵 หลังบ้าน — Server Processing (/auth/refresh)
+' ============================================================
+
+note right #FFF9C4
+  <b>5xx handling (Redis/DB down):</b>
+  ถ้า step ใดๆ ด้านล่างเจอ infra ล้ม
+  → return <b>500 (1012)</b> database_error
+  หรือ <b>500 (1013)</b> internal_server_error
+  → FE จัดการเหมือน 5xx ด้านบน (no logout, retry)
+end note
+
+if (Validate body\nมี refreshToken?) then (ไม่)
+  #FADBD8:<b>400 (1008)</b> validation_failed;
+  stop
+endif
+
+:1. Verify signature + type == refresh;
+
+if (signature/format/type\nผิด?) then (ใช่)
+  #FADBD8:<b>401 (1004)</b> refresh_token_invalid;
+  stop
+endif
+
+:2. Check exp claim ≥ NOW;
+
+if (JWT exp < NOW\n<i>(idle 8h+)</i>?) then (ใช่)
+  #FCF3CF:<b>401 (1005)</b> refresh_token_expired;
+  note right #FFE0E0
+    BA rule: idle 8h+ = auto logout
+  end note
+  stop
+endif
+
+:Redis GET refresh_token:userId:jti;
+
+if (พบใน Redis?) then (ไม่พบ)
+  note right #FFE0E0
+    JWT ยัง valid แต่ Redis key หาย
+    = ถูก rotate ไปก่อนแล้ว = <b>REPLAY</b>
+  end note
+  :Redis SCAN+DEL\nrefresh_token:userId:*\n(revoke ทุก session);
+  :Audit: SUSPICIOUS_REFRESH_REPLAY;
+  #FADBD8:<b>401 (2009)</b> token_replay;
+  stop
+endif
+
+:MongoDB findOne: users { _id };
+
+if (status == ACTIVE?) then (ไม่)
+  :Redis DEL refresh_token:userId:jti;
+  #FADBD8:<b>403 (1007)</b> inactive_user;
+  stop
+endif
+
+:Generate JWT pair ใหม่:\n• access 15m (scope=FULL)\n• refresh 8h (new jti);
+
+:<b>Redis atomic Lua:</b>\nDEL refresh_token:userId:old_jti\nSET refresh_token:userId:new_jti\nEX 28800 (8h sliding);
+
+if (Redis/DB error?) then (ใช่)
+  #FCF3CF:<b>500 (1012/1013)</b>\nserver_error;
+  stop
+endif
+
+:Audit: TOKEN_REFRESH;
+
+#D5F5E3:<b>200 OK</b>\n{ accessToken, refreshToken,\nexpiresIn: 900 };
+
+' ============================================================
+' 🟢 หน้าบ้าน — Client Post-Refresh
+' ============================================================
+
+:Save new tokens\n(ทับของเก่า สำคัญ!);
+
+:Retry original request\nด้วย access ใหม่;
+
+#D5F5E3:<b>Return</b> result 🎉;
+
+stop
+
+@enduml

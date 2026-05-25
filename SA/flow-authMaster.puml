@@ -1,0 +1,116 @@
+@startuml flow-authMaster
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam ActivityBackgroundColor #E8F4FD
+skinparam ActivityBorderColor #2C5F8A
+skinparam ActivityDiamondBackgroundColor #FFF9C4
+skinparam ActivityDiamondBorderColor #F0C000
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+
+title <b>Authentication Master Flow</b>\n<i>3 Cases รวมใน /auth/login + Convergence to Change Password → Re-Login</i>
+
+start
+
+note right #FFF9C4
+  <b>Pre-condition (Case 1):</b>
+  Super Admin สร้าง user
+  → ระบบ gen temp password
+  → ส่งไปยัง email ของ user
+end note
+
+#FFEEEE:User ได้รับ email (Case 1) หรือมี password อยู่แล้ว (Case 2/3);
+
+:หน้า Login: กรอก username + password;
+:<b>POST</b> /auth/login\n{ username, password };
+
+if (Credentials valid?) then (ไม่)
+  #FADBD8:<b>401 (2001)</b> Invalid credentials;
+  stop
+endif
+
+if (status == ACTIVE?) then (ไม่)
+  #FADBD8:<b>403 (1007)</b> Inactive user;
+  stop
+endif
+
+if (bcrypt.Compare<br/>passwordHash, input?) then (ตรง — Real Password)
+
+  if (passwordExpiresAt ≤ NOW?) then (หมดอายุ — <b>Case 3</b>)
+    #FCE4EC:Issue JWT\nscope = "CHANGE_PASSWORD"\ntrigger = "expired"\nTTL = 15 นาที;
+    #FCE4EC:Frontend → /change-password;
+  else (ไม่หมด — <b>Case 2</b>)
+    #C8E6C9:<b>━━━ CASE 2: Normal Login Success ━━━</b>;
+    :Issue Full Tokens\naccess 15m (scope=FULL)\n+ refresh <b>24h</b>;
+    :<b>Single-session kick:</b>\nRedis SCAN+DEL refresh_token:userId:*\n+ SET refresh_token:userId:newJti EX 86400;
+    :UPDATE users.lastLoginAt;
+    #D5F5E3:<b>200</b> Frontend → <b>/dashboard</b> 🎉;
+    stop
+  endif
+
+else (ไม่ตรง — ลอง temp password)
+
+  if (isTempPassword=true\n+ tempPasswordHash != null?) then (ใช่)
+
+    if (tempPasswordExpiresAt > NOW?) then (ยังไม่หมด)
+
+      if (bcrypt.Compare<br/>tempPasswordHash, input?) then (ตรง — <b>Case 1</b>)
+        #FCE4EC:Issue JWT\nscope = "CHANGE_PASSWORD"\ntrigger = "first_time"\nTTL = 15 นาที;
+        #FCE4EC:Frontend → /change-password;
+        note right
+          Temp password ใช้ซ้ำได้
+          จนกว่า set password สำเร็จ
+        end note
+      else (ไม่ตรง)
+        #FADBD8:<b>401 (2001)</b> Invalid credentials;
+        stop
+      endif
+
+    else (หมด >7 วัน)
+      #FADBD8:<b>401 (2002)</b> Temp password expired<br/>(ติดต่อ Admin);
+      stop
+    endif
+
+  else
+    #FADBD8:<b>401 (2001)</b> Invalid credentials;
+    stop
+  endif
+
+endif
+
+' =============== CONVERGE: Change Password ===============
+#FFF3E0:<b>━━━ Convergence: Change Password (Case 1 & 3) ━━━</b>;
+:<b>POST</b> /auth/change-password\n<font color=gray>Bearer {limitedToken}\n{ newPassword }</font>;
+
+note right #FFF9C4
+  Backend อ่าน trigger จาก JWT เพื่อ audit log
+  (ทั้ง 3 cases ไม่ต้อง verify oldPassword)
+end note
+
+if (Validate + complexity ผ่าน?) then (ไม่)
+  #FADBD8:<b>400</b> Validation /\n<b>Same as Temp (2012)</b> /\nSame Pwd (2004) /\nWeak Pwd (2005);
+  stop
+endif
+
+:bcrypt.hash newPassword (cost 12);
+
+:UPDATE users SET\npasswordHash, passwordChangedAt,\npasswordExpiresAt = NOW+90d,\n<b>isTempPassword = false,</b>\n<b>tempPasswordHash = null,</b>\n<b>tempPasswordExpiresAt = null</b>;
+
+:Revoke ALL sessions:\nRedis SCAN+DEL refresh_token:userId:*\n+ Blacklist current jti;
+
+:Audit: PASSWORD_CHANGED { trigger };
+
+#D5F5E3:<b>200</b> OK\nrequireReLogin: true;
+
+:Frontend clear tokens →\n<b>redirect /login</b>;
+
+note right #FFF9C4
+  ➜ User ต้อง login ใหม่
+  ด้วยรหัสใหม่ที่เพิ่งตั้ง
+  → กลับเข้าวงจร <b>Case 2</b>
+end note
+
+stop
+
+@enduml

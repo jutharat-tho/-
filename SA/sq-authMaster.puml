@@ -1,0 +1,218 @@
+@startuml sq-authMaster
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign center
+skinparam backgroundColor #FAFAFA
+skinparam ParticipantBackgroundColor #4A90D9
+skinparam ParticipantFontColor #FFFFFF
+skinparam ParticipantBorderColor #2C5F8A
+skinparam ActorBackgroundColor #E8F4FD
+skinparam ActorBorderColor #2C5F8A
+skinparam DatabaseBackgroundColor #F5A623
+skinparam DatabaseFontColor #FFFFFF
+skinparam DatabaseBorderColor #C47D0A
+skinparam SequenceLifeLineBorderColor #AAAAAA
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF9C4
+skinparam NoteBorderColor #F0C000
+skinparam sequenceArrowThickness 1.5
+skinparam SequenceGroupBackgroundColor #F0F4FF
+skinparam SequenceGroupBorderColor #B0BEC5
+skinparam SequenceGroupFontColor #37474F
+
+title <b>Authentication Master Sequence</b>\n<i>3 Cases (Temp Password / Normal / Expired) + Convergence</i>
+
+actor "👤 User" as User
+participant "<b>Frontend</b>\n(Vue 3)" as FE #4A90D9
+participant "<b>API</b>" as API #4A90D9
+participant "<b>Auth\nService</b>" as SVC #7B68EE
+database "<b>Redis</b>" as Redis #E74C3C
+database "<b>MongoDB</b>" as DB #F5A623
+participant "<b>Email\nService</b>" as Mail #2ECC71
+
+== Pre-condition: Super Admin สร้าง user (Case 1 only) ==
+
+note over DB, Mail #FCE4EC
+  <b>Super Admin Create User:</b>
+  Backend gen temp password (12 chars)
+  → bcrypt hash → save to user.tempPasswordHash
+  → set tempPasswordExpiresAt = NOW + 7 วัน
+  → set isTempPassword = true
+end note
+
+Mail -[#2ECC71]-> User : 📧 <b>Welcome — Your account is ready</b>\n<font color=gray>Username: 700\nTemp Password: Aa1$xY9k!Lp</font>
+
+== 🟦 LOGIN (Case 1 / 2 / 3 — endpoint เดียว) ==
+
+User -> FE : กรอก username + password
+activate FE #FCE4EC
+FE -> API : <b>POST</b> /auth/login\n<font color=gray>{ username, password }</font>
+activate API #FCE4EC
+
+API -> Redis : INCR login_attempts:{ip} EX 60
+activate Redis #FADBD8
+Redis --> API : count
+deactivate Redis
+
+alt <font color=#C0392B><b>Rate Limit / Validation Failed</b></font>
+  API --[#C0392B]> FE : <font color=#C0392B><b>500 (1014) / 400 (1008)</b></font>
+end
+
+API -> SVC : login(username, password, ip)
+activate SVC #FCE4EC
+SVC -> DB : findOne({ username })
+activate DB #FEF9E7
+DB --> SVC : user | null
+deactivate DB
+
+alt <font color=#C0392B><b>User Not Found / Inactive</b></font>
+  SVC -> DB : insert audit_log (LOGIN_FAILED)
+  activate DB #FEF9E7
+  DB --> SVC : ok
+  deactivate DB
+  SVC --[#C0392B]> API : ERR
+  API --[#C0392B]> FE : <font color=#C0392B><b>401 (2001) / 403 (1007)</b></font>
+end
+
+SVC -> SVC : bcrypt.Compare(passwordHash, input)
+
+alt <font color=#27AE60><b>🟢 Real password ตรง</b></font>
+
+  SVC -> SVC : check passwordExpiresAt vs NOW
+
+  alt <font color=#E67E22><b>🟠 Case 3: Password Expired</b></font>
+    SVC -> SVC : generate JWT\nscope="CHANGE_PASSWORD"\ntrigger="expired"\nTTL=15m
+    SVC -> DB : insert audit_log\n(PASSWORD_EXPIRED_FORCED_CHANGE)
+    activate DB #FEF9E7
+    DB --> SVC : ok
+    deactivate DB
+    SVC --> API : { accessToken (limited),\npasswordExpired: true }\n<i>(ไม่มี refreshToken)</i>
+    API --[#E67E22]> FE : <font color=#E67E22><b>200</b></font> passwordExpired
+    FE --> User : <b>หน้า Change Password</b>
+
+  else <font color=#27AE60><b>🟢 Case 2: Login Success</b></font>
+    SVC -> SVC : generate access (15m, scope=FULL)\n+ refresh (<b>24h</b>)
+    note right of SVC #D5F5E3
+      <b>Single-session kick:</b>
+      เตะ session เก่า
+    end note
+    SVC -> Redis : SCAN refresh_token:{userId}:*\n→ DEL ทุกตัว
+    activate Redis #FADBD8
+    Redis --> SVC : OK
+    deactivate Redis
+    SVC -> Redis : SET refresh_token:{userId}:{newJti}\nEX 86400
+    activate Redis #FADBD8
+    Redis --> SVC : OK
+    deactivate Redis
+    SVC -> DB : UPDATE users\nSET lastLoginAt, lastLoginIP
+    activate DB #FEF9E7
+    DB --> SVC : ok
+    deactivate DB
+    SVC -> DB : insert audit_log (LOGIN_SUCCESS)
+    activate DB #FEF9E7
+    DB --> SVC : ok
+    deactivate DB
+    SVC --> API : { Full tokens + user profile }
+    API --[#27AE60]> FE : <font color=#27AE60><b>200</b></font> Login Success
+    FE --> User : <b>redirect → /dashboard</b> 🎉
+  end
+
+else <font color=#2980B9><b>🔵 Real password ไม่ตรง — ลอง Temp Password</b></font>
+
+  alt <font color=#2980B9><b>Case 1: Temp Password</b></font>
+    SVC -> SVC : check isTempPassword=true\n+ tempPasswordHash != null
+
+    alt <font color=#C0392B><b>Temp password expired (>7 วัน)</b></font>
+      SVC --[#C0392B]> API : ERR: TEMP_PASSWORD_EXPIRED
+      API --[#C0392B]> FE : <font color=#C0392B><b>401 (2002)</b></font> Temp password expired<br/>(ติดต่อ Admin)
+    end
+
+    SVC -> SVC : bcrypt.Compare(tempPasswordHash, input)
+    alt <font color=#C0392B><b>Temp ไม่ตรง</b></font>
+      SVC -> DB : insert audit_log (LOGIN_FAILED)
+      activate DB #FEF9E7
+      DB --> SVC : ok
+      deactivate DB
+      SVC --[#C0392B]> API : ERR
+      API --[#C0392B]> FE : <font color=#C0392B><b>401 (2001)</b></font> Invalid Credentials
+    end
+
+    SVC -> SVC : generate JWT\nscope="CHANGE_PASSWORD"\ntrigger="first_time"\nTTL=15m
+    SVC -> DB : insert audit_log\n(LOGIN_TEMP_PASSWORD)
+    activate DB #FEF9E7
+    DB --> SVC : ok
+    deactivate DB
+    SVC --> API : { accessToken (limited),\nisTempPassword: true,\ntrigger: "first_time" }\n<i>(ไม่มี refreshToken)</i>
+    deactivate SVC
+    API --[#2980B9]> FE : <font color=#2980B9><b>200</b></font>
+    deactivate API
+    FE --> User : <b>หน้า Change Password</b>\n(Temp password ใช้ซ้ำได้ จนกว่า set สำเร็จ)
+    deactivate FE
+  end
+end
+
+== 🟣 Convergence: Change Password (Case 1 & 3) ==
+
+User -> FE : กรอก newPassword
+activate FE #FFF3E0
+FE -> API : <b>POST</b> /auth/change-password\n<font color=gray>Bearer {limitedToken}\n{ newPassword }</font>
+activate API #FFF3E0
+
+API -> SVC : changePassword(userId, newPwd,\ntrigger, currentJti)
+activate SVC #FFF3E0
+
+SVC -> DB : findOne({ _id: userId })
+activate DB #FEF9E7
+DB --> SVC : user
+deactivate DB
+
+note right of SVC #D6EAF8
+  ไม่ verify oldPassword ทั้ง 3 cases
+  Trust JWT token — trigger ใช้สำหรับ audit
+end note
+
+SVC -> SVC : check newPassword != <b>tempPasswordHash</b> (ถ้า != null)
+SVC -> SVC : check newPassword != current passwordHash
+SVC -> SVC : validate complexity rules
+
+alt <font color=#C0392B><b>Same-as-Temp / Same / Weak Password</b></font>
+  SVC --[#C0392B]> API : ERR
+  API --[#C0392B]> FE : <font color=#C0392B><b>400</b></font> 2012 / 2004 / 2005
+end
+
+SVC -> SVC : newHash = bcrypt.Hash(newPwd, 12)
+
+SVC -> DB : UPDATE users SET\npasswordHash = newHash,\npasswordChangedAt = NOW,\npasswordExpiresAt = NOW+90d,\n<b>isTempPassword = false,</b>\n<b>tempPasswordHash = null,</b>\n<b>tempPasswordExpiresAt = null</b>
+activate DB #FEF9E7
+DB --> SVC : updated
+deactivate DB
+
+SVC -> Redis : SCAN+DEL refresh_token:{userId}:*
+activate Redis #FADBD8
+Redis --> SVC : OK
+deactivate Redis
+
+SVC -> Redis : SET token_blacklist:{currentJti}\nEX ttlRemaining
+activate Redis #FADBD8
+Redis --> SVC : OK
+deactivate Redis
+
+SVC -> DB : insert audit_log\n(PASSWORD_CHANGED, { trigger })
+activate DB #FEF9E7
+DB --> SVC : ok
+deactivate DB
+
+SVC --> API : SUCCESS
+deactivate SVC
+API --[#27AE60]> FE : <font color=#27AE60><b>200</b></font> Password Changed
+deactivate API
+
+FE -> FE : clear tokens จาก storage
+FE --> User : <b>redirect → /login</b>\n"กรุณา login ด้วยรหัสใหม่"
+deactivate FE
+
+note over User, DB #D5F5E3
+  ➜ User กลับเข้าวงจร <b>Case 2</b>
+  (login ปกติด้วยรหัสใหม่)
+end note
+
+@enduml
