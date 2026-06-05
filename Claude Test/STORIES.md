@@ -140,6 +140,90 @@
 
 ---
 
+## Settings area _(NEW 2026-06-05 — reverse-engineered from Figma, BRD pending BA)_
+
+> ⚠️ All R-CAT/R-SUB/R-PG/R-MOD/R-PTY/R-PTN rules in these stories are inferred. Block on BA confirmation before sprint planning.
+
+### LEASING-SET-01 — Product Category (List + Create + Edit)
+
+| Field | Value |
+|---|---|
+| Figma — list | [`4123:37453`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4123-37453) |
+| Figma — create modal (Fill=no) | [`4126:38864`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4126-38864) |
+| Figma — edit modal (Fill=yes) | [`4126:38863`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4126-38863) |
+| Rules | R-CAT-01..R-CAT-04 _(pending BA confirmation)_ |
+| Components | Data table · Buttons/Basic · Dialog (large modal, radius-400) · Text field · Text area · Select (รหัส) |
+| Notes | Create form has 3 fields (รหัส*, ชื่อ*, คำอธิบาย). Edit form adds Status field (เปิด/ปิดใช้งาน). **Save button uses Secondary/Basic green (#019267)** — not brand red. |
+
+### LEASING-SET-02 — Subcategories (List + Create + Edit)
+
+| Field | Value |
+|---|---|
+| Figma — list | [`4131:16139`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4131-16139) |
+| Figma — create | [`4131:17423`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4131-17423) |
+| Figma — edit | [`4131:17422`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4131-17422) |
+| Rules | R-SUB-01..R-SUB-03 _(pending BA)_ |
+| Components | Data table · Dialog · Text field · Select (parent Category — FK) |
+| Notes | Subcategory belongs to a parent Category (FK relationship inferred — confirm with BA). Same UI pattern as F-09. |
+
+### LEASING-SET-03 — Product Group (List + Create form)
+
+| Field | Value |
+|---|---|
+| Figma — list | [`4165:16007`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4165-16007) |
+| Figma — create | [`4165:16009`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4165-16009) |
+| Rules | R-PG-01..R-PG-03 _(pending BA)_ |
+| Components | Data table · Form-grid (large) · Buttons/Basic |
+| Notes | Create form is a **dedicated page (not modal)** because of size. Has header fields + 3 nested tables (interest rates / sub-models / annual totals) — but the tables are populated via separate modals in LEASING-SET-04. |
+
+### LEASING-SET-04 — Product Group: nested modals (Interest rate / Sub-model / Annual total)
+
+| Field | Value |
+|---|---|
+| Figma — info page (composite) | [`4443:12536`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4443-12536) |
+| Figma — modal wrapper (3 types) | [`4537:9694`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4537-9694) |
+| Figma — Interest rate Fill=no / yes | [`4460:14573`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4460-14573) · [`4460:14572`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4460-14572) |
+| Figma — Sub-model Fill=no / yes | [`4463:9144`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9144) · [`4463:9143`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9143) |
+| Figma — Annual total Fill=no / yes | [`4463:9778`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9778) · [`4463:9777`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9777) |
+| Rules | R-PG-01, R-PG-02 _(pending BA)_ |
+| Components | 3 Dialog variants · Form-grid · Number input · Currency input (likely) |
+| Notes | Each of the 3 sub-modals has Fill=no (empty) + Fill=yes (data) variants. Wrapper `4537:9694` packages all 3 modal types together. Implement as 3 separate React components with consistent prop signature. |
+
+### LEASING-SET-05 — Product Model List (List + Create + Edit)
+
+| Field | Value |
+|---|---|
+| Figma — list | [`4199:24667`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4199-24667) |
+| Figma — create | [`4199:26976`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4199-26976) |
+| Figma — edit | [`4199:26978`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4199-26978) |
+| Rules | R-MOD-01..R-MOD-02 _(pending BA)_ |
+| Components | Data table · Dialog · Text field · Select (parent Group — FK) |
+| Notes | Same CRUD pattern. Likely has FK to Product Group (TBD). |
+
+### LEASING-SET-06 — Partner Type (List + Create + Edit)
+
+| Field | Value |
+|---|---|
+| Figma — list | [`4215:3686`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-3686) |
+| Figma — create | [`4215:4105`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-4105) |
+| Figma — edit | [`4215:4104`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-4104) |
+| Rules | R-PTY-01..R-PTY-02 _(pending BA)_ |
+| Components | Data table · Dialog · Text field |
+| Notes | Master data — list of partner types referenced by F-14. Same CRUD pattern. |
+
+### LEASING-SET-07 — Partner Information (2 entity-type variants)
+
+| Field | Value |
+|---|---|
+| Figma — list (Default) | [`4215:6732`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-6732) |
+| Figma — Form นิติบุคคล (juristic) | [`4216:25929`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4216-25929) |
+| Figma — Form บุคคลธรรมดา (individual) | [`4295:16938`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4295-16938) |
+| Rules | R-PTN-01..R-PTN-03 _(pending BA)_ |
+| Components | Data table · Radio/Toggle (entity type) · Form-grid (large) · Text field × many · Select (Partner Type FK) |
+| Notes | **Two distinct full-page forms** depending on entity type selection. User picks type first → form structure changes. Implement as 2 separate React components sharing a parent route. Confirm with BA whether type is locked after create. |
+
+---
+
 ## Cross-cutting
 
 ### LEASING-SES-01 — Auto logout (background)
@@ -159,3 +243,4 @@
 |---|---|---|
 | 2026-05-23 | Initial story set covering all designed screens (LEASING-AUTH-01..06, LEASING-USR-01..05, LEASING-SES-01) | Kick-off — one story per ship-able piece of UI |
 | 2026-05-25 | LEASING-AUTH-06 simplified — reuse-last guard removed (R-PWD-05 retired per SA), dialog `329:38735` marked do-not-implement, rules updated to R-PWD-01..03 only | SA team finalized auth — backend no longer checks against last password |
+| 2026-06-05 | Added Settings area — 7 new stories (LEASING-SET-01..07) covering Product Category, Subcategories, Product Group + 3 sub-modals, Product Model, Partner Type, Partner Information (2 variants). All marked BRD-pending. | New Figma scope `4122:14114` — registered for FE planning |

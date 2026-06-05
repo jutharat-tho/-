@@ -21,6 +21,12 @@
 | F-06 | Super Admin — Reset Password | `336:39954` (modal) | ✅ designed |
 | F-07 | Forgot Password | — (process only; user contacts admin) | n/a — no UI |
 | F-08 | Auto Logout | — (background timer) | ⚠️ UX feedback TBD |
+| F-09 | Settings — Product Category | `4123:37453` + modal `4126:38865` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
+| F-10 | Settings — Subcategories | `4131:16139` + modal `4131:17424` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
+| F-11 | Settings — Product Group + sub-modals | `4165:16008` / `4443:12536` / `4537:9694` | ✅ designed (Figma) · ⚠️ most complex — 3 nested tables |
+| F-12 | Settings — Product Model List | `4199:24667` + modal `4199:26977` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
+| F-13 | Settings — Partner Type | `4215:3686` + modal `4215:4106` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
+| F-14 | Settings — Partner Information (2 form variants) | `4216:27149` (juristic + personal) | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
 
 ---
 
@@ -71,6 +77,67 @@ Legend for the 7-state checklist:
 | Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
 |---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | RP-DLG | Reset Password confirmation modal | ✅ | ⚠️ | n/a | ⚠️ | ✅ | n/a | ⚠️ | `336:39954` |
+
+### 2.6 Feature F-09 to F-14 — Settings Module (NEW 2026-06-05)
+
+> **Pattern:** Each entity (Category / Subcategory / Model / Partner Type) follows the same CRUD shape — **List page** + **Create modal (Fill=no)** + **Edit modal (Fill=yes)** + Status field on Edit only. Product Group (F-11) + Partner Information (F-14) break the pattern with larger composite forms.
+
+#### F-09 Product Category
+
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| SET-CAT-1 | List | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `4123:37453` |
+| SET-CAT-2 | Modal — Create (Fill=no) | ✅ | ⚠️ | ✅ | ⚠️ | n/a | ⚠️ | ⚠️ | `4126:38864` |
+| SET-CAT-3 | Modal — Edit (Fill=yes) + Status | ✅ | ⚠️ | n/a | ⚠️ | n/a | ⚠️ | ⚠️ | `4126:38863` |
+
+#### F-10 Subcategories
+
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| SET-SUB-1 | List | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `4131:16139` |
+| SET-SUB-2 | Modal — Create | ✅ | ⚠️ | ✅ | ⚠️ | n/a | ⚠️ | ⚠️ | `4131:17423` |
+| SET-SUB-3 | Modal — Edit | ✅ | ⚠️ | n/a | ⚠️ | n/a | ⚠️ | ⚠️ | `4131:17422` |
+
+#### F-11 Product Group (largest)
+
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| SET-PG-1 | List | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `4165:16007` |
+| SET-PG-2 | Create page (large form) | ✅ | ⚠️ | ✅ | ⚠️ | n/a | ⚠️ | ⚠️ | `4165:16009` |
+| SET-PG-3 | Info / Edit page (3 nested tables) | ✅ | ⚠️ | n/a | ⚠️ | n/a | ⚠️ | ⚠️ | `4443:12536` |
+| SET-PG-MOD-IR | Modal — Interest rate (Fill=no/yes) | ✅ | ⚠️ | ✅ | ⚠️ | n/a | n/a | ⚠️ | `4460:14573` / `4460:14572` |
+| SET-PG-MOD-SM | Modal — Sub-model (Fill=no/yes) | ✅ | ⚠️ | ✅ | ⚠️ | n/a | n/a | ⚠️ | `4463:9144` / `4463:9143` |
+| SET-PG-MOD-AT | Modal — Annual total (Fill=no/yes) | ✅ | ⚠️ | ✅ | ⚠️ | n/a | n/a | ⚠️ | `4463:9778` / `4463:9777` |
+
+#### F-12 Product Model List
+
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| SET-MOD-1 | List | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `4199:24667` |
+| SET-MOD-2 | Modal — Create | ✅ | ⚠️ | ✅ | ⚠️ | n/a | ⚠️ | ⚠️ | `4199:26976` |
+| SET-MOD-3 | Modal — Edit | ✅ | ⚠️ | n/a | ⚠️ | n/a | ⚠️ | ⚠️ | `4199:26978` |
+
+#### F-13 Partner Type
+
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| SET-PTY-1 | List | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `4215:3686` |
+| SET-PTY-2 | Modal — Create | ✅ | ⚠️ | ✅ | ⚠️ | n/a | ⚠️ | ⚠️ | `4215:4105` |
+| SET-PTY-3 | Modal — Edit | ✅ | ⚠️ | n/a | ⚠️ | n/a | ⚠️ | ⚠️ | `4215:4104` |
+
+#### F-14 Partner Information (2 form variants)
+
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| SET-PTN-1 | List — Default | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `4215:6732` |
+| SET-PTN-2 | Form — นิติบุคคล (juristic, large) | ✅ | ⚠️ | ✅ | ⚠️ | n/a | ⚠️ | ⚠️ | `4216:25929` |
+| SET-PTN-3 | Form — บุคคลธรรมดา (individual, large) | ✅ | ⚠️ | ✅ | ⚠️ | n/a | ⚠️ | ⚠️ | `4295:16938` |
+
+> 🎨 **Notable design tokens introduced by Settings module:**
+> - Save button uses **`Secondary/Basic` (#019267, green)** instead of brand red — distinct from Auth flow's pattern
+> - Cancel button uses **outline brand red** (`border-button-brand`)
+> - Modal radius bumped from `radius-200` (8px) to `radius-400` (16px) for these large modals
+> - Modal max-width = 1212px with backdrop blur 4px overlay
 
 ### Gaps to close before Dev handoff
 
@@ -276,3 +343,4 @@ Current Figma frames are all `1440 × 1024`. For BO, this is acceptable as the p
 |---|---|---|
 | 2026-05-23 | Initial spec covering F-01 to F-06, plus accessibility, copy table, state inventory, gaps | First sync from Figma + FigJam — gaps captured for next iteration |
 | 2026-05-25 | Synced SA spec — deprecated PE2-DLG screen (reuse-last guard removed per R-PWD-05 retire), removed "matches last" error copy row, added error code `2012` reference. See [SA folder](file:///Users/buttar/Documents/ai/SA/) for authoritative API spec + sequence diagrams. | SA team finalized auth implementation — design must follow actual backend behavior |
+| 2026-06-05 | Added Settings module (F-09..F-14) — 18+ screens across Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information. State matrix shows ~95% gap on loading/disabled/responsive (consistent with existing modules). Documented new tokens: green Save button, larger modal radius. | New scope from Figma `4122:14114` — design exists, BRD pending BA confirmation |

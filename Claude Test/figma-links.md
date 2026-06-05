@@ -112,6 +112,68 @@ Library key (for `search_design_system`): `lk-c68a63b1bc4f9f2d89eadb0d56ded742d7
 | Node | Purpose | Node ID | URL |
 |---|---|---|---|
 | Library entry (selected page/node from intake) | starting point for tokens & components | `23:154` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=23-154) |
+| Primitives section (colors, etc.) | full color ramp + Base | `4095:130` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4095-130) |
+
+### Page: `↳ Page : Settings` (`4122:14114`)
+
+[Open page](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4122-14114)
+
+Settings module covers Product / Partner / Pricing master-data management. **No BRD yet — reverse-engineered from Figma 2026-06-05.**
+
+#### F-09 Product Category (หมวดสินค้า)
+
+| Screen | Purpose | Node ID | URL |
+|---|---|---|---|
+| List | landing | `4123:37453` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4123-37453) |
+| Modal — Fill=no (create) | empty form | `4126:38864` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4126-38864) |
+| Modal — Fill=yes (edit) | with data + status field | `4126:38863` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4126-38863) |
+
+#### F-10 Subcategories (หมวดย่อย)
+
+| Screen | Purpose | Node ID | URL |
+|---|---|---|---|
+| List | landing | `4131:16139` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4131-16139) |
+| Modal — Fill=no | empty form | `4131:17423` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4131-17423) |
+| Modal — Fill=yes | with data | `4131:17422` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4131-17422) |
+
+#### F-11 Product Group (กลุ่มสินค้า)
+
+| Screen | Purpose | Node ID | URL |
+|---|---|---|---|
+| List — Default | landing | `4165:16007` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4165-16007) |
+| Create form | สร้างกลุ่มสินค้า (large form) | `4165:16009` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4165-16009) |
+| Product Group info — page | detail/edit (large form) | `4443:12536` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4443-12536) |
+| Modal — Interest rate (Fill=no) | เพิ่มอัตราดอกเบี้ย | `4460:14573` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4460-14573) |
+| Modal — Interest rate (Fill=yes) | with data | `4460:14572` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4460-14572) |
+| Modal — Sub-model (Fill=no) | เพิ่มรุ่นย่อย | `4463:9144` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9144) |
+| Modal — Sub-model (Fill=yes) | with data | `4463:9143` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9143) |
+| Modal — Annual total (Fill=no) | เพิ่มยอดจัด | `4463:9778` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9778) |
+| Modal — Annual total (Fill=yes) | with data | `4463:9777` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4463-9777) |
+| Modal-Product group info (3 types) — combined wrapper | wrapper containing 3 sub-modals | `4537:9694` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4537-9694) |
+
+#### F-12 Product Model List (รุ่นสินค้า)
+
+| Screen | Purpose | Node ID | URL |
+|---|---|---|---|
+| List | landing | `4199:24667` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4199-24667) |
+| Modal — Fill=no | empty form | `4199:26976` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4199-26976) |
+| Modal — Fill=yes | with data | `4199:26978` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4199-26978) |
+
+#### F-13 Partner Type (ประเภทคู่ค้า)
+
+| Screen | Purpose | Node ID | URL |
+|---|---|---|---|
+| List | landing | `4215:3686` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-3686) |
+| Modal — Fill=no | empty form | `4215:4105` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-4105) |
+| Modal — Fill=yes | with data | `4215:4104` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-4104) |
+
+#### F-14 Partner Information (ข้อมูลคู่ค้า)
+
+| Screen | Purpose | Node ID | URL |
+|---|---|---|---|
+| List — Default | landing (table) | `4215:6732` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4215-6732) |
+| Form — นิติบุคคล (juristic) | สร้างข้อมูลคู่ค้า — legal entity | `4216:25929` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4216-25929) |
+| Form — บุคคลธรรมดา (personal) | สร้างข้อมูลคู่ค้า — individual | `4295:16938` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4295-16938) |
 
 > **Note:** Variable defs (`get_variable_defs`) requires an active selection in the Figma desktop app and returned an error when called via MCP. Tokens listed in `design-tokens.md` were extracted from `get_design_context` responses on Login screens, which surface the same Figma Variables as CSS custom properties.
 
@@ -141,3 +203,4 @@ When SA spec disagrees with Figma:
 |---|---|---|
 | 2026-05-23 | Initial registry created with all sections from Login & Logout, Create User, Edit User, plus FigJam Requirements board | Kick-off of UX/UI workflow session |
 | 2026-05-25 | Added "Related — SA / System Spec" section pointing at `/Users/buttar/Documents/ai/SA/` | SA team published auth spec — UX/UI needs to cross-reference for API contract |
+| 2026-06-05 | Added new Settings page registry (`4122:14114`) — F-09..F-14 (Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information). 30+ new node IDs registered. Primitives node `4095:130` also linked. | Component library team published Settings module — UX/UI scope expanded |
