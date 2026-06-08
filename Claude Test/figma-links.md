@@ -3,20 +3,30 @@
 > Single source of truth for all Figma file URLs and node IDs.
 > When a node ID changes, update this file FIRST, then propagate to other docs.
 
-**Last sync:** 2026-05-23
+**Last sync:** 2026-06-08
 **Owner:** UX/UI
 
 ---
 
-## Files
+## Files _(Project file structure — 6 files total as of 2026-06-08)_
 
-| Purpose | File Name | File Key | URL |
-|---|---|---|---|
-| Requirements (FigJam) | `Rqm.` | `3Bh0umTeO36kjHvnsbNArq` | [Open](https://www.figma.com/board/3Bh0umTeO36kjHvnsbNArq/Rqm.) |
-| Design — Leasing BO | `Leasing-Design` | `OthuQyTNoG9V5s9Z94L5O3` | [Open](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/Leasing-Design) |
-| Component Library | `❖ Components : Leasing Design BO` | `IgbC5dmSjDDUmJgTHCr7v2` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO) |
+The project was reorganized into per-module Figma files. The original `Leasing-Design` file (`OthuQyTNoG9V5s9Z94L5O3`) was **renamed** to `BO - User & Role Permission` (same fileKey — all existing node IDs still resolve).
+
+| # | Purpose | File Name (current) | File Key | URL |
+|---|---|---|---|---|
+| 1 | Requirements (FigJam) | `Rqm.` | `3Bh0umTeO36kjHvnsbNArq` | [Open](https://www.figma.com/board/3Bh0umTeO36kjHvnsbNArq/Rqm.) |
+| 2 | Design — User Mgmt + Auth | `BO - User & Role Permission` _(was: Leasing-Design)_ | `OthuQyTNoG9V5s9Z94L5O3` | [Open](https://www.figma.com/design/OthuQyTNoG9V5s9Z94L5O3/BO---User--Role-Permission) |
+| 3 | Design — Loan Application | `BO - Loan Application` _(NEW 2026-06-08)_ | `gQFZW0Dx2q9LDxdpAghaKZ` | [Open](https://www.figma.com/design/gQFZW0Dx2q9LDxdpAghaKZ/BO---Loan-Application) |
+| 4 | Design — Customer | `BO - Customer` _(NEW 2026-06-08)_ | `oBfkloeAjurpB977NnWo8H` | [Open](https://www.figma.com/design/oBfkloeAjurpB977NnWo8H/BO---Customer) |
+| 5 | Design — Settings | `BO - Setting` _(NEW 2026-06-08)_ | `kYSQdQ57JG8oOVjLElJDYv` | [Open](https://www.figma.com/design/kYSQdQ57JG8oOVjLElJDYv/BO---Setting) |
+| 6 | Design — Content Management | `BO - Content Management` _(NEW 2026-06-08)_ | `nj3GMHSybP4HFguzfOlUM5` | [Open](https://www.figma.com/design/nj3GMHSybP4HFguzfOlUM5/BO---Content-Management) |
+| 7 | Component Library | `❖ Components : Leasing Design BO` | `IgbC5dmSjDDUmJgTHCr7v2` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO) |
 
 Library key (for `search_design_system`): `lk-c68a63b1bc4f9f2d89eadb0d56ded742d7ef402b9ce7d0964bbb2d09ea2dbb02f2a876b5929a3b6d8d4cdf84a9fd30e64cd9aa38f2b8fc8bbc66c2c06de02d5a`
+
+> ⚠️ **Files 3–6 are NEW** — only Cover artwork visible from top-level API listing. Actual screen content (BA Flow / Design / User flow) lives in sub-pages that require a specific `node-id` URL to discover. **Until BA/PM shares specific node URLs, treat these as scope placeholders.**
+
+> 📋 **Note:** The Settings work we registered earlier (F-09..F-14, nodes `4122:14114`..`4537:9694`) was extracted from the **Component Library** (`IgbC5dmSjDDUmJgTHCr7v2`), which contains the **reusable component instances** for Settings. The new `BO - Setting` file (`kYSQdQ57JG8oOVjLElJDYv`) is expected to contain the **screen-level assembly** using those components — still to be discovered.
 
 ---
 
@@ -179,6 +189,46 @@ Settings module covers Product / Partner / Pricing master-data management. **No 
 
 ---
 
+## Design File — `BO - Loan Application` _(scope placeholder — content TBD)_
+
+| File Key | Cover Page | URL |
+|---|---|---|
+| `gQFZW0Dx2q9LDxdpAghaKZ` | `1001:4` | [Open file](https://www.figma.com/design/gQFZW0Dx2q9LDxdpAghaKZ/BO---Loan-Application) |
+
+Expected sections (based on Pentor Leasing user matrix module): **Application Information** (`application.customer_history.*`, `application.application.*`). Specific screens TBD — awaiting BA/PM to share node URLs.
+
+---
+
+## Design File — `BO - Customer` _(scope placeholder — content TBD)_
+
+| File Key | Cover Page | URL |
+|---|---|---|
+| `oBfkloeAjurpB977NnWo8H` | `3:3` | [Open file](https://www.figma.com/design/oBfkloeAjurpB977NnWo8H/BO---Customer) |
+
+Expected sections: **Customer management** (`การจัดการลูกค้า`) — customer profile, history, contact, KYC. 3 sub-flows indicated by Cover: BA Flow / Design / User flow. Specific screens TBD.
+
+---
+
+## Design File — `BO - Setting` _(scope placeholder — content TBD)_
+
+| File Key | Cover Page | URL |
+|---|---|---|
+| `kYSQdQ57JG8oOVjLElJDYv` | `1001:3` | [Open file](https://www.figma.com/design/kYSQdQ57JG8oOVjLElJDYv/BO---Setting) |
+
+Expected to contain **screen-level assembly** of the Settings module components already registered above under `Component Library → ↳ Page : Settings` (F-09..F-14). Specific node IDs TBD — when BA/PM shares them, replace the component-library node IDs in F-09..F-14 stories with the screen-level IDs from this file.
+
+---
+
+## Design File — `BO - Content Management` _(scope placeholder — content TBD)_
+
+| File Key | Cover Page | URL |
+|---|---|---|
+| `nj3GMHSybP4HFguzfOlUM5` | `0:1` | [Open file](https://www.figma.com/design/nj3GMHSybP4HFguzfOlUM5/BO---Content-Management) |
+
+Expected sections (based on user matrix): **Content Management** module — 12 permissions including banner / promotion / news / FAQ. Specific screens TBD.
+
+---
+
 ## Related — SA / System Spec _(non-Figma, local reference)_
 
 Authoritative API contracts + sequence diagrams from System Architect team. Lives at `/Users/buttar/Documents/ai/SA/` on UX/UI workstation (not in this repo).
@@ -204,3 +254,4 @@ When SA spec disagrees with Figma:
 | 2026-05-23 | Initial registry created with all sections from Login & Logout, Create User, Edit User, plus FigJam Requirements board | Kick-off of UX/UI workflow session |
 | 2026-05-25 | Added "Related — SA / System Spec" section pointing at `/Users/buttar/Documents/ai/SA/` | SA team published auth spec — UX/UI needs to cross-reference for API contract |
 | 2026-06-05 | Added new Settings page registry (`4122:14114`) — F-09..F-14 (Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information). 30+ new node IDs registered. Primitives node `4095:130` also linked. | Component library team published Settings module — UX/UI scope expanded |
+| 2026-06-09 | Project reorganized into per-module Figma files — `Leasing-Design` renamed to `BO - User & Role Permission` (same fileKey), 4 new files added: `BO - Loan Application`, `BO - Customer`, `BO - Setting`, `BO - Content Management`. All new files currently scope placeholders (only Cover visible). | BA/PM split master file into per-domain files — scope expanded to full BO |

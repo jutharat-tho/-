@@ -27,6 +27,10 @@
 | F-12 | Settings — Product Model List | `4199:24667` + modal `4199:26977` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
 | F-13 | Settings — Partner Type | `4215:3686` + modal `4215:4106` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
 | F-14 | Settings — Partner Information (2 form variants) | `4216:27149` (juristic + personal) | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
+| F-15 | **Loan Application** module — full | file `gQFZW0Dx2q9LDxdpAghaKZ` | ⏳ scope placeholder — file exists, screens TBD |
+| F-16 | **Customer** module — full | file `oBfkloeAjurpB977NnWo8H` | ⏳ scope placeholder — file exists, screens TBD |
+| F-17 | **Settings screens** (assembly of F-09..F-14) | file `kYSQdQ57JG8oOVjLElJDYv` | ⏳ scope placeholder — screen-level container, components already in library |
+| F-18 | **Content Management** module — full | file `nj3GMHSybP4HFguzfOlUM5` | ⏳ scope placeholder — file exists, screens TBD |
 
 ---
 
@@ -344,3 +348,4 @@ Current Figma frames are all `1440 × 1024`. For BO, this is acceptable as the p
 | 2026-05-23 | Initial spec covering F-01 to F-06, plus accessibility, copy table, state inventory, gaps | First sync from Figma + FigJam — gaps captured for next iteration |
 | 2026-05-25 | Synced SA spec — deprecated PE2-DLG screen (reuse-last guard removed per R-PWD-05 retire), removed "matches last" error copy row, added error code `2012` reference. See [SA folder](file:///Users/buttar/Documents/ai/SA/) for authoritative API spec + sequence diagrams. | SA team finalized auth implementation — design must follow actual backend behavior |
 | 2026-06-05 | Added Settings module (F-09..F-14) — 18+ screens across Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information. State matrix shows ~95% gap on loading/disabled/responsive (consistent with existing modules). Documented new tokens: green Save button, larger modal radius. | New scope from Figma `4122:14114` — design exists, BRD pending BA confirmation |
+| 2026-06-09 | Added F-15..F-18 scope placeholders (Loan Application, Customer, Settings screens, Content Management). Project reorganized into 6 per-module Figma files; `Leasing-Design` renamed to `BO - User & Role Permission` (fileKey unchanged). Detailed screen inventory will populate when BA/PM shares specific node URLs. | BA/PM split master Figma into per-domain files — total scope now spans 18 features (F-01..F-18) |
