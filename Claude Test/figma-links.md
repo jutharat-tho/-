@@ -20,7 +20,8 @@ The project was reorganized into per-module Figma files. The original `Leasing-D
 | 4 | Design — Customer | `BO - Customer` _(NEW 2026-06-08)_ | `oBfkloeAjurpB977NnWo8H` | [Open](https://www.figma.com/design/oBfkloeAjurpB977NnWo8H/BO---Customer) |
 | 5 | Design — Settings | `BO - Setting` _(NEW 2026-06-08)_ | `kYSQdQ57JG8oOVjLElJDYv` | [Open](https://www.figma.com/design/kYSQdQ57JG8oOVjLElJDYv/BO---Setting) |
 | 6 | Design — Content Management | `BO - Content Management` _(NEW 2026-06-08)_ | `nj3GMHSybP4HFguzfOlUM5` | [Open](https://www.figma.com/design/nj3GMHSybP4HFguzfOlUM5/BO---Content-Management) |
-| 7 | Component Library | `❖ Components : Leasing Design BO` | `IgbC5dmSjDDUmJgTHCr7v2` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO) |
+| 7 | Design — Financial Management | `BO - Financial Management` _(NEW 2026-07-14)_ | `xByR0qZwcrRDK7tFwjEF2t` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management) |
+| 8 | Component Library | `❖ Components : Leasing Design BO` | `IgbC5dmSjDDUmJgTHCr7v2` | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO) |
 
 Library key (for `search_design_system`): `lk-c68a63b1bc4f9f2d89eadb0d56ded742d7ef402b9ce7d0964bbb2d09ea2dbb02f2a876b5929a3b6d8d4cdf84a9fd30e64cd9aa38f2b8fc8bbc66c2c06de02d5a`
 
@@ -289,6 +290,38 @@ Expected sections (based on user matrix): **Content Management** module — 12 p
 
 ---
 
+## Design File — `BO - Financial Management` — F-19 _(registered 2026-07-14)_
+
+Module: **ระบบการเงิน (Financial Management)**. **Scope registered: only the two Disbursement pages** (per request 2026-07-14). Other pages in this file are out of scope for now.
+
+### F-19.1 — Disbursement (page `1:2`)
+
+Payment-summary screen shown before disbursing a loan.
+
+| Element | Node ID | URL |
+|---|---|---|
+| Page `↳ Disbursement` | `1:2` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=1-2) |
+| Main content (Section 1) | `35:2485` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=35-2485) |
+| Payment details (component) | `44:5627` / instances `29:6858`, `29:9403` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=44-5627) |
+| Dropdown list | `1:8552` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=1-8552) |
+
+Content blocks observed: ข้อมูลลูกค้า · ข้อมูลสัญญา/รถ · บัญชีผู้ค้ารถ (dealer account) · บัญชีผู้ให้บริการ/คอมมิชชั่น · รายละเอียดการจ่ายค่ารถ (ยอดโอนสุทธิ) · รายละเอียดการจ่ายค่าบริการ (คอมมิชชั่น) · รวมยอดเงินโอนสุทธิ.
+
+### F-19.2 — Disbursement Report (section `77:5431`)
+
+Report + printable receipt flow (list → detail → receipt document).
+
+| Element | Node ID | URL |
+|---|---|---|
+| Section `Disbursement Report` | `77:5431` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=77-5431) |
+| Financial Management-page (wrapper) | `43:9337` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=43-9337) |
+| Payment details (report rows) | `65:4522`, `65:16931`, `80:5517`, `95:8532`, `169:44471`, `171:50948`, `171:51488` | — |
+| Receipt document `ใบเสร็จรับเงิน` (ต้นฉบับ) | `106:7289` | [Open](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=106-7289) |
+
+Receipts branded **PENTOR LEASING** + **PENTOR CAPITAL CO., LTD.** — printable A4 "ต้นฉบับ" (original) layout. Far-right doc = disbursement schedule / debt table (ตารางแสดงหนี้).
+
+---
+
 ## Related — SA / System Spec _(non-Figma, local reference)_
 
 Authoritative API contracts + sequence diagrams from System Architect team. Lives at `/Users/buttar/Documents/ai/SA/` on UX/UI workstation (not in this repo).
@@ -316,3 +349,4 @@ When SA spec disagrees with Figma:
 | 2026-06-05 | Added new Settings page registry (`4122:14114`) — F-09..F-14 (Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information). 30+ new node IDs registered. Primitives node `4095:130` also linked. | Component library team published Settings module — UX/UI scope expanded |
 | 2026-06-09 | Project reorganized into per-module Figma files — `Leasing-Design` renamed to `BO - User & Role Permission` (same fileKey), 4 new files added: `BO - Loan Application`, `BO - Customer`, `BO - Setting`, `BO - Content Management`. All new files currently scope placeholders (only Cover visible). | BA/PM split master file into per-domain files — scope expanded to full BO |
 | 2026-06-12 | Promoted F-15 Loan Application from placeholder → full registry. Registered 5-stage role lifecycle (Marketing → Support → Analyst → Approve+Contract → Disbursement), ~30 components with node IDs + variants from Component Library `4022:7981`; BO screen page = `1001:5`. Flagged I-16 (cross-file paste strips text overrides). | Loan Application content confirmed via MCP scan |
+| 2026-07-14 | Registered new file `BO - Financial Management` (`xByR0qZwcrRDK7tFwjEF2t`) — **scope limited to 2 pages only**: F-19.1 Disbursement (`1:2` / `35:2485`) + F-19.2 Disbursement Report (`77:5431`, incl. printable receipt `106:7289`). Other pages in file intentionally not registered. | Per request — update only Disbursement + Disbursement Report |

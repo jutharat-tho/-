@@ -31,6 +31,7 @@
 | F-16 | **Customer** module — full | file `oBfkloeAjurpB977NnWo8H` | ⏳ scope placeholder — file exists, screens TBD |
 | F-17 | **Settings screens** (assembly of F-09..F-14) | file `kYSQdQ57JG8oOVjLElJDYv` | ⏳ scope placeholder — screen-level container, components already in library |
 | F-18 | **Content Management** module — full | file `nj3GMHSybP4HFguzfOlUM5` | ⏳ scope placeholder — file exists, screens TBD |
+| F-19 | **Financial Management** — Disbursement + Disbursement Report only | file `xByR0qZwcrRDK7tFwjEF2t` | ✅ designed (2 pages in scope) · ⚠️ BRD reverse-engineered · see §2.8 |
 
 ---
 
@@ -161,6 +162,31 @@ Legend for the 7-state checklist:
 - Disbursement form (LOAN-5) is the most data-dense screen in the whole BO — 2-column layout, left = cost breakdown form (~15 currency fields), right = expense line-item table (10 rows) pulled from a "Master ค่าใช้จ่าย" filtered by vehicle type.
 - Uses green Save/forward buttons (`Secondary/Basic #019267`) — same pattern as Settings module (I-12).
 - **Variant naming is inconsistent** across the module (`Fill=`, `Type=`, `Upload=`, `Step=`, `No data=`) and mixes TH/EN variant values (`Type=ตารางแสดงหนี้`). Flagged I-17 for design-system cleanup before Code Connect.
+
+### 2.8 Feature F-19 — Financial Management: Disbursement (NEW 2026-07-14)
+
+> **Scope note:** only the two Disbursement pages are in scope. Other Financial Management pages exist in the file but are intentionally not documented yet.
+
+| Screen ID | Name | D | L | E | X | S | DIS | R | Figma |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| FIN-DISB-1 | Disbursement — payment summary | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ | `35:2485` (page `1:2`) |
+| FIN-RPT-1 | Disbursement Report — list + detail | ✅ | ⚠️ | ⚠️ | ⚠️ | n/a | n/a | ⚠️ | `77:5431` |
+| FIN-RPT-2 | Receipt document (ใบเสร็จรับเงิน, printable) | ✅ | n/a | n/a | n/a | n/a | n/a | ⚠️ (A4 print) | `106:7289` |
+
+**Disbursement (FIN-DISB-1)** — read-mostly summary before disbursing:
+- 4 info blocks: ข้อมูลลูกค้า · ข้อมูลสัญญา/รถ · บัญชีผู้ค้ารถ (dealer) · บัญชีผู้ให้บริการ/คอมมิชชั่น
+- 2 payment breakdowns: ค่ารถ (ยอดโอนสุทธิ, e.g. 149,355) + ค่าบริการ/คอมมิชชั่น (e.g. 11,640)
+- Grand total: **รวมยอดเงินโอนสุทธิ** (e.g. 160,995) — highlighted in green (`Secondary`)
+
+**Disbursement Report (FIN-RPT-1/2):**
+- Flow: report list → detail → **printable receipt** (`ใบเสร็จรับเงิน`, "ต้นฉบับ" original)
+- Receipts branded PENTOR LEASING / PENTOR CAPITAL CO., LTD. — A4 print layout
+- Rightmost doc = disbursement schedule / debt table (ตารางแสดงหนี้)
+
+**Notable:**
+- Receipt = **print-oriented layout** (A4) — needs a dedicated print stylesheet / PDF export spec, different from screen breakpoints. Flag for FE.
+- Money fields use green for net/positive totals, consistent with Secondary token.
+- ⚠️ BRD absent — R-FIN-* rules reverse-engineered (see requirement.md §3.10).
 
 ### Gaps to close before Dev handoff
 
@@ -369,3 +395,4 @@ Current Figma frames are all `1440 × 1024`. For BO, this is acceptable as the p
 | 2026-06-05 | Added Settings module (F-09..F-14) — 18+ screens across Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information. State matrix shows ~95% gap on loading/disabled/responsive (consistent with existing modules). Documented new tokens: green Save button, larger modal radius. | New scope from Figma `4122:14114` — design exists, BRD pending BA confirmation |
 | 2026-06-09 | Added F-15..F-18 scope placeholders (Loan Application, Customer, Settings screens, Content Management). Project reorganized into 6 per-module Figma files; `Leasing-Design` renamed to `BO - User & Role Permission` (fileKey unchanged). Detailed screen inventory will populate when BA/PM shares specific node URLs. | BA/PM split master Figma into per-domain files — total scope now spans 18 features (F-01..F-18) |
 | 2026-06-12 | Promoted F-15 Loan Application from placeholder to designed — added §2.7 with 5-stage role lifecycle (Marketing → Support → Analyst → Approve+Contract → Disbursement), state coverage note, design observations. Flagged I-16 (paste strips overrides), I-17 (variant naming inconsistency). | Loan Application content confirmed via MCP; BRD still reverse-engineered |
+| 2026-07-14 | Added F-19 Financial Management §2.8 — **only Disbursement + Disbursement Report pages** (per request). 3 screens: payment summary, report list/detail, printable receipt. Flagged print-layout handoff need. | New file BO - Financial Management scanned via MCP; scope limited to 2 pages |

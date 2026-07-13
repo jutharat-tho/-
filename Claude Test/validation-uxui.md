@@ -40,6 +40,7 @@
 | F-16 Customer module | `placeholder` | — | — | — | **NEW 2026-06-09** — waiting for BA/PM to share screen node URLs from `BO - Customer` file |
 | F-17 Settings screens (assembly) | `placeholder` | — | — | — | **NEW 2026-06-09** — components ready (F-09..F-14), need screen-level layout from `BO - Setting` file |
 | F-18 Content Management module | `placeholder` | — | — | — | **NEW 2026-06-09** — waiting for BA/PM to share screen node URLs from `BO - Content Management` file |
+| F-19 Financial Mgmt — Disbursement (2 pages) | `draft` | — | — | — | **NEW 2026-07-14** — Disbursement + Disbursement Report only. 2 stories (LEASING-FIN-01/02). BRD reverse-engineered. Other FM pages out of scope. |
 
 Status values: `draft` → `in_review` → `approved` → `final`.
 
@@ -63,6 +64,8 @@ Status values: `draft` → `in_review` → `approved` → `final`.
 | I-15 | Confirm the relationship between Component Library `↳ Page : Settings` (existing, F-09..F-14) and the new `BO - Setting` file. Likely component-vs-screen assembly split — component library defines reusable Forms+Modals, BO - Setting wires them into the actual pages with sidebar/nav. | UX/UI + Design system | — | open (new 2026-06-09) |
 | I-16 | **Cross-file paste strips text overrides.** Copying Loan Application components from Component Library → `BO - Loan Application` drops label + placeholder text (structure survives, data disappears). Confirmed on Loan Disbursement Preparation instance `1658:372537`. Root cause: deep nested-instance hierarchy — override paths fail to resolve across files. **Workaround:** drag fresh instance from Assets panel instead of paste. **Real fix:** design-system team should flatten component nesting. | Design system + UX/UI | — | **blocker** for Loan App handoff (new 2026-06-12) |
 | I-17 | **Variant naming inconsistent across Loan Application module** — mixes `Fill=`, `Type=`, `Upload=`, `Step=`, `No data=` and uses TH values (`Type=ตารางแสดงหนี้`, `Type=สัญญา`). Also `Type=Agen` likely typo for `Agent`. Standardize before Code Connect so FE prop API is consistent. | Design system | — | open (new 2026-06-12) |
+| I-18 | **Disbursement receipt (`106:7289`) is a print/A4 document, not a screen** — needs a dedicated print stylesheet or PDF-export spec (page size, margins, page breaks, mono/no-color for print). Confirm delivery format with BA + FE (browser print dialog vs server-generated PDF). | BA + FE Lead | — | open (new 2026-07-14) |
+| I-19 | Disbursement summary (`35:2485`) — confirm which money fields are user-editable vs computed/read-only, and where the source figures come from (Loan Application disbursement-prep stage LOAN-5?). Likely inherits from the loan flow. | BA | — | open (new 2026-07-14) |
 | I-06 | Define focus-ring token + apply across components | UX/UI | — | open |
 | I-07 | EN copy for all error/dialog strings | BA | — | open |
 | I-08 | Audit logging UI for admin actions (next release?) | PM | — | deferred |
@@ -89,3 +92,4 @@ Status values: `draft` → `in_review` → `approved` → `final`.
 | 2026-06-05 | Added Settings module (F-09..F-14) — 6 new feature rows, 7 new stories (LEASING-SET-01..07). Opened **I-11 (BRD missing — blocker)**, I-12 (green Save button precedent), I-13 (modal radius token) | Figma component library expanded with `↳ Page : Settings` (`4122:14114`) — Settings scope appeared without BRD |
 | 2026-06-09 | Added F-15..F-18 placeholders (Loan Application, Customer, Settings screens, Content Management). 4 new Figma files registered. Opened **I-14 (need screen node URLs — blocker)**, I-15 (component-vs-screen split). | BA/PM reorganized into 6 per-domain Figma files |
 | 2026-06-12 | F-15 Loan Application promoted placeholder → draft (5 stories registered). Opened **I-16 (paste strips overrides — blocker)** + I-17 (variant naming). Partially resolves I-14 for the Loan Application file. | Loan Application content confirmed + copy-paste issue diagnosed via MCP |
+| 2026-07-14 | Added F-19 Financial Management (Disbursement + Disbursement Report only). 2 stories. Opened I-18 (receipt print/PDF spec) + I-19 (editable vs computed money fields). | New file scanned via MCP; scope limited to 2 pages per request |

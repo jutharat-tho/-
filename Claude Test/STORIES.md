@@ -281,6 +281,32 @@
 
 ---
 
+## Financial Management area _(NEW 2026-07-14 — Disbursement pages only, BRD pending BA)_
+
+> ⚠️ Scope limited to the two Disbursement pages of `BO - Financial Management`. Other pages in that file are not registered yet.
+
+### LEASING-FIN-01 — Disbursement (payment summary)
+
+| Field | Value |
+|---|---|
+| Figma — page | [`1:2`](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=1-2) |
+| Figma — content | [`35:2485`](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=35-2485) |
+| Rules | R-FIN-01..R-FIN-03 _(pending BA)_ |
+| Components | Payment details (`44:5627`) · Dropdown list (`1:8552`) · info blocks · money summary |
+| Notes | Read-mostly summary before disbursing. 4 info blocks (ลูกค้า / สัญญา-รถ / บัญชีผู้ค้ารถ / บัญชีคอมมิชชั่น) + 2 payment breakdowns (ค่ารถ + ค่าบริการ) + green grand total (รวมยอดเงินโอนสุทธิ). Confirm which fields are editable vs read-only. |
+
+### LEASING-FIN-02 — Disbursement Report + receipt
+
+| Field | Value |
+|---|---|
+| Figma — section | [`77:5431`](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=77-5431) |
+| Figma — receipt doc | [`106:7289`](https://www.figma.com/design/xByR0qZwcrRDK7tFwjEF2t/BO---Financial-Management?node-id=106-7289) |
+| Rules | R-FIN-04..R-FIN-05 _(pending BA)_ |
+| Components | Financial Management-page wrapper (`43:9337`) · Payment details (report rows) · Receipt document (A4) |
+| Notes | Flow: report list → detail → printable receipt (ใบเสร็จรับเงิน "ต้นฉบับ", PENTOR LEASING/CAPITAL). Rightmost = disbursement schedule table. **Needs dedicated print/PDF stylesheet** — not a normal responsive breakpoint. Confirm export format (PDF? print dialog?) with BA + FE. |
+
+---
+
 ## Cross-cutting
 
 ### LEASING-SES-01 — Auto logout (background)
@@ -303,3 +329,4 @@
 | 2026-06-05 | Added Settings area — 7 new stories (LEASING-SET-01..07) covering Product Category, Subcategories, Product Group + 3 sub-modals, Product Model, Partner Type, Partner Information (2 variants). All marked BRD-pending. | New Figma scope `4122:14114` — registered for FE planning |
 | 2026-06-09 | Noted project file reorganization (Leasing-Design renamed to `BO - User & Role Permission`, 4 new per-domain files added). F-15..F-18 placeholders registered in UXUI_DESIGN — stories for these modules will be added when BA/PM shares specific screen node URLs (see I-14). | BA/PM split master into per-module files |
 | 2026-06-12 | Added Loan Application area — 5 stories (LEASING-LOAN-01..05) for the role lifecycle (Marketing → Support → Analyst → Approve+Contract → Disbursement). All BRD-pending. | Loan Application content confirmed via MCP |
+| 2026-07-14 | Added Financial Management area — 2 stories (LEASING-FIN-01 Disbursement, LEASING-FIN-02 Disbursement Report + receipt). Scope limited to these 2 pages per request. Flagged print/PDF stylesheet need. | New file BO - Financial Management scanned via MCP |
