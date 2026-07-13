@@ -224,6 +224,63 @@
 
 ---
 
+## Loan Application area _(NEW 2026-06-12 — reverse-engineered from Figma, BRD pending BA)_
+
+> ⚠️ 5-stage role lifecycle. An application flows Marketing → Support → Analyst → Approve+Contract → Disbursement. Node IDs are from Component Library `4022:7981`; screen assembly in BO file page `1001:5`. **All rules inferred — block on BA before sprint.**
+
+### LEASING-LOAN-01 — Marketing: create application
+
+| Field | Value |
+|---|---|
+| Figma — section | [`4623:49390`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4623-49390) |
+| Key components | Application information (`4613:17736`, Type=Marketing/Agen) · Lease information · Insurance · Guarantor · Upload · Product group |
+| Rules | R-LOAN-* _(pending BA)_ |
+| Components | Form-grid (large) · Text field · Upload · Modal · Document details |
+| Notes | Entry point of the lifecycle. `Type=Agen` variant likely typo for "Agent" — confirm. Multi-section form; Upload has no/yes states. |
+
+### LEASING-LOAN-02 — Support: check documents
+
+| Field | Value |
+|---|---|
+| Figma — section | [`4853:39932`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4853-39932) |
+| Key components | List of loan application forms (`4623:49389`) · Check the documents (`4646:28832`) |
+| Rules | R-LOAN-* _(pending BA)_ |
+| Components | Data table · Document checklist |
+| Notes | Support role reviews uploaded docs before passing to Analyst. |
+
+### LEASING-LOAN-03 — Analyst: credit review
+
+| Field | Value |
+|---|---|
+| Figma — section | [`4853:40234`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4853-40234) |
+| Key components | Analysis report (`4632:92937`) · Account statement info (`4646:29376`, No data=yes/no) · Add transaction history + modal · Hire-purchase info · Guarantor info |
+| Rules | R-LOAN-* _(pending BA)_ |
+| Components | Form-grid · Data table · Checkbox grid (credit criteria) · Modal · Text area (notes) |
+| Notes | Heaviest analysis screen — many checkbox criteria (อาชีพ / อายุงาน / ประวัติเครดิต etc). Account statement has empty-state (No data=yes). |
+
+### LEASING-LOAN-04 — Approver: approve + record contract
+
+| Field | Value |
+|---|---|
+| Figma — section | [`4853:40241`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4853-40241) |
+| Key components | Approve (`4816:27790`) · Loan approval results (`4660:51426`) · Contract details (`4660:77023`, Default/Fill/Disabled) · Record of the contract (`4660:80191`, Step=1/2) · Modal-Preview · Window-Modal-Preview |
+| Rules | R-LOAN-* _(pending BA)_ |
+| Components | Approve panel · Multi-step form (Step 1/2) · Preview modal (debt table / contract doc) |
+| Notes | Contract recording is a 2-step wizard. Preview modal shows either payment schedule table or contract document. Contract details has a Disabled state (read-only after approval). |
+
+### LEASING-LOAN-05 — Disbursement preparation
+
+| Field | Value |
+|---|---|
+| Figma — section | [`4938:32720`](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4938-32720) |
+| Figma — BO instance | [`1658:372537`](https://www.figma.com/design/gQFZW0Dx2q9LDxdpAghaKZ/BO---Loan-Application?node-id=1658-372537) |
+| Key components | Loan Disbursement Preparation (`4903:55383`) · Transfer fees (`4903:50967`) · Transfer amount (`4903:54603`) |
+| Rules | R-LOAN-* _(pending BA)_ |
+| Components | 2-col layout · ~15 currency fields · Expense line-item table (10 rows) · green forward button |
+| Notes | Most data-dense screen. Left = cost breakdown (ราคารถ, เงินดาวน์, ยอดจัดสินเชื่อ, ประกัน, ค่าคอมฯ...); right = expense table from "Master ค่าใช้จ่าย" filtered by vehicle type. **Actions:** ยกเลิก / บันทึกร่าง / ส่งต่อฝ่ายตรวจสอบ. ⚠️ instance in BO file has text overrides stripped (I-16). |
+
+---
+
 ## Cross-cutting
 
 ### LEASING-SES-01 — Auto logout (background)
@@ -245,3 +302,4 @@
 | 2026-05-25 | LEASING-AUTH-06 simplified — reuse-last guard removed (R-PWD-05 retired per SA), dialog `329:38735` marked do-not-implement, rules updated to R-PWD-01..03 only | SA team finalized auth — backend no longer checks against last password |
 | 2026-06-05 | Added Settings area — 7 new stories (LEASING-SET-01..07) covering Product Category, Subcategories, Product Group + 3 sub-modals, Product Model, Partner Type, Partner Information (2 variants). All marked BRD-pending. | New Figma scope `4122:14114` — registered for FE planning |
 | 2026-06-09 | Noted project file reorganization (Leasing-Design renamed to `BO - User & Role Permission`, 4 new per-domain files added). F-15..F-18 placeholders registered in UXUI_DESIGN — stories for these modules will be added when BA/PM shares specific screen node URLs (see I-14). | BA/PM split master into per-module files |
+| 2026-06-12 | Added Loan Application area — 5 stories (LEASING-LOAN-01..05) for the role lifecycle (Marketing → Support → Analyst → Approve+Contract → Disbursement). All BRD-pending. | Loan Application content confirmed via MCP |

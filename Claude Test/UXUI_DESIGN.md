@@ -27,7 +27,7 @@
 | F-12 | Settings — Product Model List | `4199:24667` + modal `4199:26977` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
 | F-13 | Settings — Partner Type | `4215:3686` + modal `4215:4106` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
 | F-14 | Settings — Partner Information (2 form variants) | `4216:27149` (juristic + personal) | ✅ designed (Figma) · ⚠️ BRD reverse-engineered |
-| F-15 | **Loan Application** module — full | file `gQFZW0Dx2q9LDxdpAghaKZ` | ⏳ scope placeholder — file exists, screens TBD |
+| F-15 | **Loan Application** module — 5-stage role lifecycle | file `gQFZW0Dx2q9LDxdpAghaKZ` page `1001:5` | ✅ designed (Figma) · ⚠️ BRD reverse-engineered · see §2.7 |
 | F-16 | **Customer** module — full | file `oBfkloeAjurpB977NnWo8H` | ⏳ scope placeholder — file exists, screens TBD |
 | F-17 | **Settings screens** (assembly of F-09..F-14) | file `kYSQdQ57JG8oOVjLElJDYv` | ⏳ scope placeholder — screen-level container, components already in library |
 | F-18 | **Content Management** module — full | file `nj3GMHSybP4HFguzfOlUM5` | ⏳ scope placeholder — file exists, screens TBD |
@@ -142,6 +142,25 @@ Legend for the 7-state checklist:
 > - Cancel button uses **outline brand red** (`border-button-brand`)
 > - Modal radius bumped from `radius-200` (8px) to `radius-400` (16px) for these large modals
 > - Modal max-width = 1212px with backdrop blur 4px overlay
+
+### 2.7 Feature F-15 — Loan Application (5-stage role lifecycle, NEW 2026-06-12)
+
+> **Flow:** an application moves through 5 roles in sequence. Each role sees the same application data but with role-specific fields + actions. This mirrors the Pentor org roles (Marketing → Support → Credit Analyst → Approver → Disbursement).
+
+| Screen ID | Stage / Role | Key sections | Figma section |
+|---|---|---|---|
+| LOAN-1 | Marketing — create application (สร้างใบคำขอ) | Application info, Lease info, Insurance, Guarantor, Upload docs, Product group | `4623:49390` |
+| LOAN-2 | Support — check documents (ตรวจสอบเอกสาร) | Application forms list, document check | `4853:39932` |
+| LOAN-3 | Analyst — credit review (พิจารณาสินเชื่อ) | Analysis report, account statement, transaction history, hire-purchase info | `4853:40234` |
+| LOAN-4 | Approver — approve + record contract (อนุมัติ + บันทึกสัญญา) | Approve, loan approval result, contract details, contract record, preview modal | `4853:40241` |
+| LOAN-5 | Disbursement prep (จัดทำรายละเอียดการจ่ายสินเชื่อ) | Payment details, transfer fees, transfer amount, net payout | `4938:32720` |
+
+**State coverage (same ~95% gap as other modules):** every component ships Fill=no / Fill=yes (empty/filled) only — no loading / error / disabled / responsive. Consistent with gap I-04.
+
+**Notable design observations:**
+- Disbursement form (LOAN-5) is the most data-dense screen in the whole BO — 2-column layout, left = cost breakdown form (~15 currency fields), right = expense line-item table (10 rows) pulled from a "Master ค่าใช้จ่าย" filtered by vehicle type.
+- Uses green Save/forward buttons (`Secondary/Basic #019267`) — same pattern as Settings module (I-12).
+- **Variant naming is inconsistent** across the module (`Fill=`, `Type=`, `Upload=`, `Step=`, `No data=`) and mixes TH/EN variant values (`Type=ตารางแสดงหนี้`). Flagged I-17 for design-system cleanup before Code Connect.
 
 ### Gaps to close before Dev handoff
 
@@ -349,3 +368,4 @@ Current Figma frames are all `1440 × 1024`. For BO, this is acceptable as the p
 | 2026-05-25 | Synced SA spec — deprecated PE2-DLG screen (reuse-last guard removed per R-PWD-05 retire), removed "matches last" error copy row, added error code `2012` reference. See [SA folder](file:///Users/buttar/Documents/ai/SA/) for authoritative API spec + sequence diagrams. | SA team finalized auth implementation — design must follow actual backend behavior |
 | 2026-06-05 | Added Settings module (F-09..F-14) — 18+ screens across Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information. State matrix shows ~95% gap on loading/disabled/responsive (consistent with existing modules). Documented new tokens: green Save button, larger modal radius. | New scope from Figma `4122:14114` — design exists, BRD pending BA confirmation |
 | 2026-06-09 | Added F-15..F-18 scope placeholders (Loan Application, Customer, Settings screens, Content Management). Project reorganized into 6 per-module Figma files; `Leasing-Design` renamed to `BO - User & Role Permission` (fileKey unchanged). Detailed screen inventory will populate when BA/PM shares specific node URLs. | BA/PM split master Figma into per-domain files — total scope now spans 18 features (F-01..F-18) |
+| 2026-06-12 | Promoted F-15 Loan Application from placeholder to designed — added §2.7 with 5-stage role lifecycle (Marketing → Support → Analyst → Approve+Contract → Disbursement), state coverage note, design observations. Flagged I-16 (paste strips overrides), I-17 (variant naming inconsistency). | Loan Application content confirmed via MCP; BRD still reverse-engineered |

@@ -36,7 +36,7 @@
 | F-12 Product Model | `draft` | — | — | — | **BRD missing** — confirm R-MOD-01..02 + FK to Group |
 | F-13 Partner Type | `draft` | — | — | — | **BRD missing** — confirm R-PTY-01..02 |
 | F-14 Partner Information | `draft` | — | — | — | **BRD missing** — confirm 2-variant form behavior |
-| F-15 Loan Application module | `placeholder` | — | — | — | **NEW 2026-06-09** — waiting for BA/PM to share screen node URLs from `BO - Loan Application` file |
+| F-15 Loan Application module | `draft` | — | — | — | **Registered 2026-06-12** — 5-stage lifecycle, 5 stories (LEASING-LOAN-01..05). BRD reverse-engineered — confirm R-LOAN-* with BA. |
 | F-16 Customer module | `placeholder` | — | — | — | **NEW 2026-06-09** — waiting for BA/PM to share screen node URLs from `BO - Customer` file |
 | F-17 Settings screens (assembly) | `placeholder` | — | — | — | **NEW 2026-06-09** — components ready (F-09..F-14), need screen-level layout from `BO - Setting` file |
 | F-18 Content Management module | `placeholder` | — | — | — | **NEW 2026-06-09** — waiting for BA/PM to share screen node URLs from `BO - Content Management` file |
@@ -61,6 +61,8 @@ Status values: `draft` → `in_review` → `approved` → `final`.
 | I-13 | Settings module — modal radius bumped from `radius-200` (8px) to `radius-400` (16px) for these large modals (1212px wide). Should this be a new size token (e.g. `dialog/large`)? | UX/UI | — | open (new 2026-06-05) |
 | I-14 | **4 new Figma files** (`BO - Loan Application`, `BO - Customer`, `BO - Setting`, `BO - Content Management`) are scope placeholders — only Cover artwork visible from Figma API. Need BA/PM to share specific screen `node-id` URLs so UX/UI can register screens + draft stories. | BA / PM | — | **blocker** (new 2026-06-09) for F-15..F-18 |
 | I-15 | Confirm the relationship between Component Library `↳ Page : Settings` (existing, F-09..F-14) and the new `BO - Setting` file. Likely component-vs-screen assembly split — component library defines reusable Forms+Modals, BO - Setting wires them into the actual pages with sidebar/nav. | UX/UI + Design system | — | open (new 2026-06-09) |
+| I-16 | **Cross-file paste strips text overrides.** Copying Loan Application components from Component Library → `BO - Loan Application` drops label + placeholder text (structure survives, data disappears). Confirmed on Loan Disbursement Preparation instance `1658:372537`. Root cause: deep nested-instance hierarchy — override paths fail to resolve across files. **Workaround:** drag fresh instance from Assets panel instead of paste. **Real fix:** design-system team should flatten component nesting. | Design system + UX/UI | — | **blocker** for Loan App handoff (new 2026-06-12) |
+| I-17 | **Variant naming inconsistent across Loan Application module** — mixes `Fill=`, `Type=`, `Upload=`, `Step=`, `No data=` and uses TH values (`Type=ตารางแสดงหนี้`, `Type=สัญญา`). Also `Type=Agen` likely typo for `Agent`. Standardize before Code Connect so FE prop API is consistent. | Design system | — | open (new 2026-06-12) |
 | I-06 | Define focus-ring token + apply across components | UX/UI | — | open |
 | I-07 | EN copy for all error/dialog strings | BA | — | open |
 | I-08 | Audit logging UI for admin actions (next release?) | PM | — | deferred |
@@ -86,3 +88,4 @@ Status values: `draft` → `in_review` → `approved` → `final`.
 | 2026-05-25 | Synced from SA spec — partially resolved I-01 (error codes defined), resolved I-05 (single-session enforcement), opened I-09 (role naming drift) + I-10 (refresh-token UX) | SA team finalized auth implementation — propagated decisions into BRD + UXUI_DESIGN + STORIES |
 | 2026-06-05 | Added Settings module (F-09..F-14) — 6 new feature rows, 7 new stories (LEASING-SET-01..07). Opened **I-11 (BRD missing — blocker)**, I-12 (green Save button precedent), I-13 (modal radius token) | Figma component library expanded with `↳ Page : Settings` (`4122:14114`) — Settings scope appeared without BRD |
 | 2026-06-09 | Added F-15..F-18 placeholders (Loan Application, Customer, Settings screens, Content Management). 4 new Figma files registered. Opened **I-14 (need screen node URLs — blocker)**, I-15 (component-vs-screen split). | BA/PM reorganized into 6 per-domain Figma files |
+| 2026-06-12 | F-15 Loan Application promoted placeholder → draft (5 stories registered). Opened **I-16 (paste strips overrides — blocker)** + I-17 (variant naming). Partially resolves I-14 for the Loan Application file. | Loan Application content confirmed + copy-paste issue diagnosed via MCP |

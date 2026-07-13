@@ -189,13 +189,73 @@ Settings module covers Product / Partner / Pricing master-data management. **No 
 
 ---
 
-## Design File — `BO - Loan Application` _(scope placeholder — content TBD)_
+## Design File — `BO - Loan Application` — F-15 _(registered 2026-06-12)_
 
-| File Key | Cover Page | URL |
+| Location | Node | URL |
 |---|---|---|
-| `gQFZW0Dx2q9LDxdpAghaKZ` | `1001:4` | [Open file](https://www.figma.com/design/gQFZW0Dx2q9LDxdpAghaKZ/BO---Loan-Application) |
+| BO file — screens page | `1001:5` (↳ Create application) | [Open](https://www.figma.com/design/gQFZW0Dx2q9LDxdpAghaKZ/BO---Loan-Application?node-id=1001-5) |
+| Component library — source page | `4022:7981` (↳ Page : Create application) | [Open](https://www.figma.com/design/IgbC5dmSjDDUmJgTHCr7v2/%E2%9D%96-Components---Leasing-Design-BO?node-id=4022-7981) |
 
-Expected sections (based on Pentor Leasing user matrix module): **Application Information** (`application.customer_history.*`, `application.application.*`). Specific screens TBD — awaiting BA/PM to share node URLs.
+The Loan Application is a **5-stage lifecycle keyed by role**. Screen-level assembly lives in the BO file (page `1001:5`, ~2100 component instances); the reusable components live in the Component Library page `4022:7981`. Node IDs below are from the **Component Library** (source of truth for component structure).
+
+### Stage 1 — Marketing (สร้างใบคำขอ) · section `4623:49390`
+
+| Component | Node ID | Variants |
+|---|---|---|
+| Application information | `4613:17736` | Fill=no/yes · Type=Marketing/Agen |
+| Lease information | `4613:17167` | Fill=no/yes |
+| Insurance information | `4606:29345` | Fill=no/yes |
+| Guarantor information. | `4606:29342` | Fill=no/yes |
+| Guarantor | `4840:34068` | Fill=no/yes |
+| Upload | `4606:28854` | Upload=no/yes |
+| Product group information | `4613:26147` | Fill=no/yes |
+| Modal-Product group information | `4842:27853` | Type=Modal/Dialog |
+| Document details | `4844:40987` | Type=Default/Up/Down |
+
+### Stage 2 — Support (ตรวจสอบเอกสาร) · section `4853:39932`
+
+| Component | Node ID |
+|---|---|
+| List of loan application forms | `4623:49389` |
+| Check the documents | `4646:28832` |
+
+### Stage 3 — Analyst (พิจารณาสินเชื่อ) · section `4853:40234`
+
+| Component | Node ID |
+|---|---|
+| Prepare a loan approval letter | `4646:28833` |
+| Application information (analyst view) | `4623:49701` |
+| Analysis report | `4632:92937` (Fill=no/yes) |
+| Product group information (analyst) | `4644:46063` |
+| Account statement information | `4646:29376` (No data=yes/no) |
+| Add transaction history + modal | `4646:28501` · `4792:54811` |
+| Hire purchase information | `4775:50546` |
+| Guarantor information | `4775:50787` |
+
+### Stage 4 — Approve + Contract (อนุมัติ + บันทึกสัญญา) · section `4853:40241`
+
+| Component | Node ID |
+|---|---|
+| Approve | `4816:27790` |
+| Loan approved | `4650:51061` |
+| Loan approval results | `4660:51426` (Fill=no/yes) |
+| History | `4894:64422` |
+| Contract details | `4660:77023` (Type=Default/Fill/Disabled) |
+| Record of the contract | `4660:80191` (Step=1/2) |
+| Modal-Preview | `4660:80977` (Type=ตารางแสดงหนี้/สัญญา) |
+| Window-Modal-Preview | `4660:81630` (Type=Default/สัญญา/Dialog) |
+
+### Stage 5 — Loan Disbursement Preparation (จัดทำรายละเอียดการจ่ายสินเชื่อ) · section `4938:32720`
+
+| Component | Node ID |
+|---|---|
+| Loan Disbursement Preparation-page | `4903:56800` |
+| Prepare loan payment details | `4894:71042` |
+| Loan Disbursement Preparation (form) | `4903:55383` |
+| Transfer fees | `4903:50967` (Fill=no/yes) |
+| Transfer amount | `4903:54603` (Fill=no/yes) |
+
+> ⚠️ **Known issue (2026-06-12):** copying these components from Component Library → `BO - Loan Application` **strips text overrides** (labels + placeholder values disappear, structure remains). Root cause: deep nested-instance hierarchy. Fix: drag fresh instance from Assets panel instead of cross-file paste, or reduce component nesting depth. See validation-uxui.md **I-16**.
 
 ---
 
@@ -255,3 +315,4 @@ When SA spec disagrees with Figma:
 | 2026-05-25 | Added "Related — SA / System Spec" section pointing at `/Users/buttar/Documents/ai/SA/` | SA team published auth spec — UX/UI needs to cross-reference for API contract |
 | 2026-06-05 | Added new Settings page registry (`4122:14114`) — F-09..F-14 (Product Category / Subcategories / Product Group / Product Model / Partner Type / Partner Information). 30+ new node IDs registered. Primitives node `4095:130` also linked. | Component library team published Settings module — UX/UI scope expanded |
 | 2026-06-09 | Project reorganized into per-module Figma files — `Leasing-Design` renamed to `BO - User & Role Permission` (same fileKey), 4 new files added: `BO - Loan Application`, `BO - Customer`, `BO - Setting`, `BO - Content Management`. All new files currently scope placeholders (only Cover visible). | BA/PM split master file into per-domain files — scope expanded to full BO |
+| 2026-06-12 | Promoted F-15 Loan Application from placeholder → full registry. Registered 5-stage role lifecycle (Marketing → Support → Analyst → Approve+Contract → Disbursement), ~30 components with node IDs + variants from Component Library `4022:7981`; BO screen page = `1001:5`. Flagged I-16 (cross-file paste strips text overrides). | Loan Application content confirmed via MCP scan |
